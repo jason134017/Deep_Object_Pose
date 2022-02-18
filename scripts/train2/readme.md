@@ -8,6 +8,9 @@ python -m torch.distributed.launch --nproc_per_node=1 train.py --network dope --
 
 There is an accompanying dataset you can also use to train DOPE on the meat can with the shiny top. [link here](https://drive.google.com/file/d/1Q5VLnlt1gu2pKIAcUo9uzSyWw1nGlSF8/view?usp=sharing).
 
+**(2021/11/25)** Update parameters 
+- `--network` now you can use **['dope','mobile','mobilev3_large','mobilev3_small','EfficientNet']** to replace image featur network
+
 # Inference
 
 I also made an inference script that runs without any ROS components.
@@ -18,4 +21,20 @@ python inference.py
 
 Look at the file for more information, similar to the ROS node everything is run through the yaml files in `config_inference`. It is very similar to the original code with some changes. 
 
-Check `models.py` as we are proposing different architectures.
+Check `models.py` as we are proposing different architectures.</br>
+**(2022/02/18)** </br>
+- Now the new architectures can be use on docker
+
+# Evaluation **(2022/02/18)**
+Made an evaluation script that use 3D IOU(google objectron). [link here](https://github.com/google-research-datasets/Objectron/blob/master/notebooks/3D_IOU.ipynb).
+
+```
+python eval.py -data ../nvisii_data_gen/output/eval --outf ./out_experiment
+``` 
+**There is a 3D coordinate conversion problem**
+## Result 
+```
+| 3D IOU Max. | 3D IOU Min. | 3D IOU Avg. |
+|:------------|:------------|:------------|
+|   0.93627   |   0.24285   |   0.74096   |
+```

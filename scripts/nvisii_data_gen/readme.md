@@ -50,6 +50,14 @@ The major parameters are as follows:
 - `--nb_objects` the number of objects to load, this can reload the same object multiple times. 
 - `--nb_distractors` how many objects to add as distractors, this uses 3D models from Google scanned objects. 
 
+### Use thread pool to create data
+
+If you have enought GPU resource,you can run the following command:
+```
+python create_data_mutiThread.py --nb_objects 1 --nb_distractors 0
+```
+#####  The parameters same above.
+
 # Adding your own 3D models 
 
 The script loads 3D models that are expressed in the format that was introduced by the YCB dataset. 
