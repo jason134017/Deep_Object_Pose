@@ -1,0 +1,4 @@
+cd ~
+git clone https://github.com/ros-perception/camera_info_manager_py
+cp -r camera_info_manager_py/src/camera_info_manager /opt/ros/noetic/lib/python3/dist-packages/
+
