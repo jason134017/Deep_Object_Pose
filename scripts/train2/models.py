@@ -161,7 +161,279 @@ class DopeMobileNet(nn.Module):
         return  [belief_0,belief_1,belief_2],\
                 [aff_0,aff_1,aff_2]
         
+class DopeMobileNetV3_Large(nn.Module):
+    def __init__(
+            self,
+            pretrained=False,
+            numBeliefMap=9,
+            numAffinity=16,
+            stop_at_stage=6  # number of stages to process (if less than total number of stages)
+        ):
+        super(DopeMobileNetV3_Large, self).__init__()
 
+        #self.mobile_feature = torch.hub.load('pytorch/vision:v0.6.0', 'mobilenet_v2', pretrained=True).features
+        self.mobile_feature =  models.mobilenet_v3_large(pretrained=True).features
+        # upsample to 50x50 from 13x13
+        self.upsample = nn.Sequential()
+        self.upsample.add_module('0', nn.Upsample(scale_factor=2))
+
+        # should this go before the upsample?
+        # self.upsample.add_module('4', nn.Conv2d(1280, 640,
+        #     kernel_size=3, stride=1, padding=1))
+        self.upsample.add_module('44',InvertedResidual(1280, 640, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+        # self.upsample.add_module('55',InvertedResidual(1280, 640, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+
+        # self.upsample.add_module('5', nn.ReLU(inplace=True))
+
+        # self.upsample.add_module('6', nn.Conv2d(640, 320,
+        #     kernel_size=3, stride=1, padding=1))
+
+        self.upsample.add_module('10', nn.Upsample(scale_factor=2))
+        # self.upsample.add_module('14', nn.Conv2d(320, 160,
+        #     kernel_size=3, stride=1, padding=1))
+        # self.upsample.add_module('15', nn.ReLU(inplace=True))
+        # self.upsample.add_module('16', nn.Conv2d(160, 64,
+        #     kernel_size=3, stride=1, padding=0))
+        self.upsample.add_module('55',InvertedResidual(640, 320, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+        self.upsample.add_module('56',InvertedResidual(320, 64, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+
+        # set 50,50
+        self.upsample.add_module('4', nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=0))
+
+        # final output - change that for mobile block
+        # self.heads_0 = nn.Sequential()
+
+        def build_block(inputs, outputs, nb_layers = 2 ):
+            layers = []
+            layers.append(InvertedResidual(inputs, 64, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+            for l in range(nb_layers-1):
+                layers.append(InvertedResidual(64, 64, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))        
+            layers.append(nn.Conv2d(64, outputs, kernel_size=3, stride=1, padding=1))
+            # layers.append('4', nn.Conv2d(64, outputs, kernel_size=3, stride=1, padding=1))
+            return nn.Sequential(*layers)
+
+        self.head_0_beliefs = build_block(64,numBeliefMap)
+        self.head_0_aff = build_block(64,(numBeliefMap-1)*2,3)
+
+        self.head_1_beliefs = build_block(64+numBeliefMap+((numBeliefMap-1)*2),numBeliefMap,3)
+        self.head_1_aff = build_block(64+numBeliefMap+(numBeliefMap-1)*2,(numBeliefMap-1)*2,2)
+
+        self.head_2_beliefs = build_block(64+numBeliefMap+((numBeliefMap-1)*2),numBeliefMap,3)
+        self.head_2_aff = build_block(64+numBeliefMap+(numBeliefMap-1)*2,(numBeliefMap-1)*2,1)
+
+
+
+    def forward(self, x):
+        '''Runs inference on the neural network'''
+        # print(x.shape)
+        out_features = self.mobile_feature(x)
+        # print('out2_features',out_features.shape)
+        output_up = self.upsample(out_features)
+        # print('output_up',output_up.shape)
+
+        # stages
+        belief_0 = self.head_0_beliefs(output_up)
+        aff_0 = self.head_0_aff(output_up)
+
+        # print(belief_0.shape)
+
+        out_0 = torch.cat([output_up, belief_0, aff_0], 1)
+
+        # print(out_0.shape)
+        # raise()
+        belief_1 = self.head_1_beliefs(out_0)
+        aff_1 = self.head_1_aff(out_0)
+
+        out_1 = torch.cat([output_up, belief_1, aff_1], 1)
+
+        belief_2 = self.head_2_beliefs(out_1)
+        aff_2 = self.head_2_aff(out_1)
+
+        return  [belief_0,belief_1,belief_2],\
+                [aff_0,aff_1,aff_2]        
+
+class DopeMobileNetV3_Small(nn.Module):
+    def __init__(
+            self,
+            pretrained=False,
+            numBeliefMap=9,
+            numAffinity=16,
+            stop_at_stage=6  # number of stages to process (if less than total number of stages)
+        ):
+        super(DopeMobileNetV3_Small, self).__init__()
+
+        #self.mobile_feature = torch.hub.load('pytorch/vision:v0.6.0', 'mobilenet_v2', pretrained=True).features
+        self.mobile_feature =  models.mobilenet_v3_small(pretrained=True).features
+        # upsample to 50x50 from 13x13
+        self.upsample = nn.Sequential()
+        self.upsample.add_module('0', nn.Upsample(scale_factor=2))
+
+        # should this go before the upsample?
+        # self.upsample.add_module('4', nn.Conv2d(1280, 640,
+        #     kernel_size=3, stride=1, padding=1))
+        self.upsample.add_module('44',InvertedResidual(1280, 640, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+        # self.upsample.add_module('55',InvertedResidual(1280, 640, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+
+        # self.upsample.add_module('5', nn.ReLU(inplace=True))
+
+        # self.upsample.add_module('6', nn.Conv2d(640, 320,
+        #     kernel_size=3, stride=1, padding=1))
+
+        self.upsample.add_module('10', nn.Upsample(scale_factor=2))
+        # self.upsample.add_module('14', nn.Conv2d(320, 160,
+        #     kernel_size=3, stride=1, padding=1))
+        # self.upsample.add_module('15', nn.ReLU(inplace=True))
+        # self.upsample.add_module('16', nn.Conv2d(160, 64,
+        #     kernel_size=3, stride=1, padding=0))
+        self.upsample.add_module('55',InvertedResidual(640, 320, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+        self.upsample.add_module('56',InvertedResidual(320, 64, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+
+        # set 50,50
+        self.upsample.add_module('4', nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=0))
+
+        # final output - change that for mobile block
+        # self.heads_0 = nn.Sequential()
+
+        def build_block(inputs, outputs, nb_layers = 2 ):
+            layers = []
+            layers.append(InvertedResidual(inputs, 64, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+            for l in range(nb_layers-1):
+                layers.append(InvertedResidual(64, 64, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))        
+            layers.append(nn.Conv2d(64, outputs, kernel_size=3, stride=1, padding=1))
+            # layers.append('4', nn.Conv2d(64, outputs, kernel_size=3, stride=1, padding=1))
+            return nn.Sequential(*layers)
+
+        self.head_0_beliefs = build_block(64,numBeliefMap)
+        self.head_0_aff = build_block(64,(numBeliefMap-1)*2,3)
+
+        self.head_1_beliefs = build_block(64+numBeliefMap+((numBeliefMap-1)*2),numBeliefMap,3)
+        self.head_1_aff = build_block(64+numBeliefMap+(numBeliefMap-1)*2,(numBeliefMap-1)*2,2)
+
+        self.head_2_beliefs = build_block(64+numBeliefMap+((numBeliefMap-1)*2),numBeliefMap,3)
+        self.head_2_aff = build_block(64+numBeliefMap+(numBeliefMap-1)*2,(numBeliefMap-1)*2,1)
+
+
+
+    def forward(self, x):
+        '''Runs inference on the neural network'''
+        # print(x.shape)
+        out_features = self.mobile_feature(x)
+        # print('out2_features',out_features.shape)
+        output_up = self.upsample(out_features)
+        # print('output_up',output_up.shape)
+
+        # stages
+        belief_0 = self.head_0_beliefs(output_up)
+        aff_0 = self.head_0_aff(output_up)
+
+        # print(belief_0.shape)
+
+        out_0 = torch.cat([output_up, belief_0, aff_0], 1)
+
+        # print(out_0.shape)
+        # raise()
+        belief_1 = self.head_1_beliefs(out_0)
+        aff_1 = self.head_1_aff(out_0)
+
+        out_1 = torch.cat([output_up, belief_1, aff_1], 1)
+
+        belief_2 = self.head_2_beliefs(out_1)
+        aff_2 = self.head_2_aff(out_1)
+
+        return  [belief_0,belief_1,belief_2],\
+                [aff_0,aff_1,aff_2]        
+
+#EfficientNet b1
+class DopeEfficientNet(nn.Module):
+    def __init__(
+            self,
+            pretrained=False,
+            numBeliefMap=9,
+            numAffinity=16,
+            stop_at_stage=6  # number of stages to process (if less than total number of stages)
+        ):
+        super(DopeEfficientNet, self).__init__()
+
+        self.efficientNet_feature = models.efficientnet_b1(pretrained=True).features
+
+        # upsample to 50x50 from 13x13
+        self.upsample = nn.Sequential()
+        self.upsample.add_module('0', nn.Upsample(scale_factor=2))
+
+        # should this go before the upsample?
+        # self.upsample.add_module('4', nn.Conv2d(1280, 640,
+        #     kernel_size=3, stride=1, padding=1))
+        self.upsample.add_module('44',InvertedResidual(1280, 640, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+        # self.upsample.add_module('55',InvertedResidual(1280, 640, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+
+        # self.upsample.add_module('5', nn.ReLU(inplace=True))
+
+        # self.upsample.add_module('6', nn.Conv2d(640, 320,
+        #     kernel_size=3, stride=1, padding=1))
+
+        self.upsample.add_module('10', nn.Upsample(scale_factor=2))
+        # self.upsample.add_module('14', nn.Conv2d(320, 160,
+        #     kernel_size=3, stride=1, padding=1))
+        # self.upsample.add_module('15', nn.ReLU(inplace=True))
+        # self.upsample.add_module('16', nn.Conv2d(160, 64,
+        #     kernel_size=3, stride=1, padding=0))
+        self.upsample.add_module('55',InvertedResidual(640, 320, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+        self.upsample.add_module('56',InvertedResidual(320, 64, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+
+        # set 50,50
+        self.upsample.add_module('4', nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=0))
+
+        # final output - change that for mobile block
+        # self.heads_0 = nn.Sequential()
+
+        def build_block(inputs, outputs, nb_layers = 2 ):
+            layers = []
+            layers.append(InvertedResidual(inputs, 64, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+            for l in range(nb_layers-1):
+                layers.append(InvertedResidual(64, 64, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))        
+            layers.append(nn.Conv2d(64, outputs, kernel_size=3, stride=1, padding=1))
+            # layers.append('4', nn.Conv2d(64, outputs, kernel_size=3, stride=1, padding=1))
+            return nn.Sequential(*layers)
+
+        self.head_0_beliefs = build_block(64,numBeliefMap)
+        self.head_0_aff = build_block(64,(numBeliefMap-1)*2,3)
+
+        self.head_1_beliefs = build_block(64+numBeliefMap+((numBeliefMap-1)*2),numBeliefMap,3)
+        self.head_1_aff = build_block(64+numBeliefMap+(numBeliefMap-1)*2,(numBeliefMap-1)*2,2)
+
+        self.head_2_beliefs = build_block(64+numBeliefMap+((numBeliefMap-1)*2),numBeliefMap,3)
+        self.head_2_aff = build_block(64+numBeliefMap+(numBeliefMap-1)*2,(numBeliefMap-1)*2,1)
+
+
+
+    def forward(self, x):
+        '''Runs inference on the neural network'''
+        # print(x.shape)
+        out_features = self.efficientNet_feature(x)
+        # print('out2_features',out_features.shape)
+        output_up = self.upsample(out_features)
+        # print('output_up',output_up.shape)
+
+        # stages
+        belief_0 = self.head_0_beliefs(output_up)
+        aff_0 = self.head_0_aff(output_up)
+
+        # print(belief_0.shape)
+
+        out_0 = torch.cat([output_up, belief_0, aff_0], 1)
+
+        # print(out_0.shape)
+        # raise()
+        belief_1 = self.head_1_beliefs(out_0)
+        aff_1 = self.head_1_aff(out_0)
+
+        out_1 = torch.cat([output_up, belief_1, aff_1], 1)
+
+        belief_2 = self.head_2_beliefs(out_1)
+        aff_2 = self.head_2_aff(out_1)
+
+        return  [belief_0,belief_1,belief_2],\
+                [aff_0,aff_1,aff_2]
 
 class DopeNetwork(nn.Module):
     def __init__(

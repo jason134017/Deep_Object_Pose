@@ -272,11 +272,11 @@ else:
                            transforms.ToTensor()])
 
 
-if opt.network == 'resnetsimple':
-    net = ResnetSimple()
-    output_size = 208
+# if opt.network == 'resnetsimple':
+#     net = ResnetSimple()
+#     output_size = 208
     
-elif opt.network == 'dope':
+if opt.network == 'dope':
     net = DopeNetwork()
     output_size = 50
     opt.sigma = 0.5
@@ -297,7 +297,25 @@ elif opt.network == 'mobile':
     output_size = 50
     opt.sigma = 0.5
     net = DopeMobileNet() 
-    
+
+elif opt.network == 'mobilev3_large':
+    net = ()
+    output_size = 50
+    opt.sigma = 0.5
+    net = DopeMobileNetV3_Large() 
+
+elif opt.network == 'mobilev3_small':
+    net = ()
+    output_size = 50
+    opt.sigma = 0.5
+    net = DopeMobileNetV3_Small() 
+
+elif opt.network == 'EfficientNet':
+    net = ()
+    output_size = 50
+    opt.sigma = 0.5
+    net = DopeEfficientNet()  
+      
 elif opt.network == 'boundary':
 
     # if not opt.net_dope is None:
@@ -470,27 +488,27 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
             # print(stage[0].shape)
             # print(target_affinity_map.shape)
             # raise()
-            # loss_tmp = (( - target_affinity_map) * (stage[0]-target_affinity_map)).mean()/opt.batchsize
+            # loss_tmp = (( - target_affinity_map) * (stage[0]-target_affinity_map)).mean()
 
 
 
-            loss_affinities += ((output_aff[stage] - target_affinities)*(output_aff[stage] - target_affinities)).mean()/opt.batchsize
+            loss_affinities += ((output_aff[stage] - target_affinities)*(output_aff[stage] - target_affinities)).mean()
             
             # print(output_belief[stage].shape)
             # print(target_belief.shape)
 
-            loss_belief += ((output_belief[stage] - target_belief)*(output_belief[stage] - target_belief)).mean()/opt.batchsize
+            loss_belief += ((output_belief[stage] - target_belief)*(output_belief[stage] - target_belief)).mean()
 
-            # loss_tmp = ((stage[1] - target_affinities) * (stage[1]-target_affinities)).mean()/opt.batchsize
+            # loss_tmp = ((stage[1] - target_affinities) * (stage[1]-target_affinities)).mean()
             # loss_affinities += loss_tmp 
 
-            # loss_tmp = ((stage[2] - target_segmentation) * (stage[2]-target_segmentation)).mean()/opt.batchsize
+            # loss_tmp = ((stage[2] - target_segmentation) * (stage[2]-target_segmentation)).mean()
             # loss_segmentation += loss_tmp
 
         # loss = loss_belief + loss_affinities * 0.9 + loss_segmentation * 0.00001
 
         # compute classification loss 
-        # loss_class = ((target_classification.flatten(1) - output_classification) * (target_classification.flatten(1) - output_classification)).mean()/opt.batchsize
+        # loss_class = ((target_classification.flatten(1) - output_classification) * (target_classification.flatten(1) - output_classification)).mean()
         # print(loss_class.item(),loss_belief.item(),loss_affinities.item() )
         loss = loss_affinities + loss_belief
 
@@ -560,12 +578,12 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
             # scaler.update()
             nb_update_network+=1
             
-            
-            # namefile = '/loss_train.txt'
-            # with open (opt.outf+namefile,'a') as file:
-            #     s = '{}, {},{:.15f}\n'.format(
-            #         epoch,batch_idx,loss.item()) 
-            #     file.write(s)
+            #write to file 
+            namefile = '/loss_train.txt'
+            with open (opt.outf+namefile,'a') as file:
+                s = '{}, {},{:.15f}\n'.format(
+                    epoch,batch_idx,loss.item()) 
+                file.write(s)
         
         # log the loss
         loss_avg_to_log["loss"].append(loss.item())

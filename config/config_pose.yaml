@@ -1,48 +1,58 @@
-topic_camera: "/dope/webcam/image_raw"
-topic_camera_info: "/dope/webcam/camera_info"
+#topic_camera: "/dope/webcam/image_raw"
+#topic_camera_info: "/dope/webcam/camera_info"
+
+#
+#/rgb_to_depth/image_raw
+topic_camera: "/rgb/image_raw"
+topic_camera_info: "/rgb/camera_info"
+#topic_camera: /rgb_to_depth/image_raw
+#topic_camera_info: "/rgb_to_depth/camera_info"
 topic_publishing: "dope"
 input_is_rectified: True   # Whether the input image is rectified (strongly suggested!)
 downscale_height: 400      # if the input image is larger than this, scale it down to this pixel height
+backbone: "dope"  #feedforward network [dope,mobile,efficientnet]
 
 # Comment any of these lines to prevent detection / pose estimation of that object
 weights: {
-    # "cracker":"package://dope/weights/cracker_60.pth",
-    # "gelatin":"package://dope/weights/gelatin_60.pth",
-    # "meat":"package://dope/weights/meat_20.pth",
-    # "mustard":"package://dope/weights/mustard_60.pth",
-    "soup":"package://dope/weights/soup_60.pth",
+    #"cracker":"package://dope/weights/cracker_60.pth",
+    #"gelatin":"package://dope/weights/gelatin_60.pth",
+    #"meat":"package://dope/weights/meat_20.pth",
+    #"mustard":"package://dope/weights/mustard_60.pth",
+    #"soup":"package://dope/weights/soup_60.pth",
     #"sugar":"package://dope/weights/sugar_60.pth",
-    # "bleach":"package://dope/weights/bleach_28_dr.pth"
+    #"bleach":"package://dope/weights/bleach_28_dr.pth",
     
     # NEW OBJECTS - HOPE
-    # "AlphabetSoup":"package://dope/weights/AlphabetSoup.pth", 
-    # "BBQSauce":"package://dope/weights/BBQSauce.pth", 
-    # "Butter":"package://dope/weights/Butter.pth", 
-    # "Cherries":"package://dope/weights/Cherries.pth", 
-    # "ChocolatePudding":"package://dope/weights/ChocolatePudding.pth", 
-    # "Cookies":"package://dope/weights/Cookies.pth", 
-    # "Corn":"package://dope/weights/Corn.pth", 
-    # "CreamCheese":"package://dope/weights/CreamCheese.pth", 
-    # "GreenBeans":"package://dope/weights/GreenBeans.pth", 
-    # "GranolaBars":"package://dope/weights/GranolaBars.pth", 
-    # "Ketchup":"package://dope/weights/Ketchup.pth", 
-    # "MacaroniAndCheese":"package://dope/weights/MacaroniAndCheese.pth", 
-    # "Mayo":"package://dope/weights/Mayo.pth", 
-    # "Milk":"package://dope/weights/Milk.pth", 
-    # "Mushrooms":"package://dope/weights/Mushrooms.pth", 
-    # "Mustard":"package://dope/weights/Mustard.pth", 
-    # "Parmesan":"package://dope/weights/Parmesan.pth", 
-    # "PeasAndCarrots":"package://dope/weights/PeasAndCarrots.pth",
-    # "Peaches":"package://dope/weights/Peaches.pth",
-    # "Pineapple":"package://dope/weights/Pineapple.pth",
-    # "Popcorn":"package://dope/weights/Popcorn.pth",
-    # "OrangeJuice":"package://dope/weights/OrangeJuice.pth", 
-    # "Raisins":"package://dope/weights/Raisins.pth",
-    # "SaladDressing":"package://dope/weights/SaladDressing.pth",
-    # "Spaghetti":"package://dope/weights/Spaghetti.pth",
-    # "TomatoSauce":"package://dope/weights/TomatoSauce.pth",
-    # "Tuna":"package://dope/weights/Tuna.pth",
-    # "Yogurt":"package://dope/weights/Yogurt.pth",
+    "AlphabetSoup":"package://dope/weights/AlphabetSoup.pth", 
+    #"BBQSauce":"package://dope/weights/BBQSauce.pth", 
+    #"Butter":"package://dope/weights/Butter.pth", 
+    #"Cherries":"package://dope/weights/Cherries.pth", 
+    #"ChocolatePudding":"package://dope/weights/ChocolatePudding.pth", 
+    #"Cookies":"package://dope/weights/Cookies.pth", 
+    #"Corn":"package://dope/weights/Corn.pth", 
+    #"CreamCheese":"package://dope/weights/CreamCheese.pth", 
+    #"GreenBeans":"package://dope/weights/GreenBeans.pth", 
+    #"GranolaBars":"package://dope/weights/GranolaBars.pth", 
+    #"Ketchup":"package://dope/weights/Ketchup.pth", 
+    #"MacaroniAndCheese":"package://dope/weights/MacaroniAndCheese.pth", 
+    #"Mayo":"package://dope/weights/Mayo.pth", 
+    #"Milk":"package://dope/weights/Milk.pth", 
+    #"Mushrooms":"package://dope/weights/Mushrooms.pth", 
+    #"Mustard":"package://dope/weights/Mustard.pth", 
+    #"Parmesan":"package://dope/weights/Parmesan.pth", 
+    #"PeasAndCarrots":"package://dope/weights/PeasAndCarrots.pth",
+    #"Peaches":"package://dope/weights/Peaches.pth",
+    #"Pineapple":"package://dope/weights/Pineapple.pth",
+    #"Popcorn":"package://dope/weights/Popcorn.pth",
+    #"OrangeJuice":"package://dope/weights/OrangeJuice.pth", 
+    #"Raisins":"package://dope/weights/Raisins.pth",
+    #"SaladDressing":"package://dope/weights/SaladDressing.pth",
+    #"Spaghetti":"package://dope/weights/Spaghetti.pth",
+    #"TomatoSauce":"package://dope/weights/TomatoSauce.pth",
+    #"Tuna":"package://dope/weights/Tuna.pth",
+    #"Yogurt":"package://dope/weights/Yogurt.pth",
+    #"Coke":"package://dope/weights/Coke.pth", 
+    "redtea":"package://dope/weights/redtea0120/net_epoch_72.pth",
 
 }
 
@@ -84,7 +94,9 @@ dimensions: {
     "GranolaBars" : [ 12.400600433349609, 3.8738000392913818, 16.53380012512207 ], 
     "Peaches" : [ 5.7781000137329102, 7.0961999893188477, 6.5925998687744141 ],
     "GreenBeans" : [ 5.758699893951416, 7.0608000755310059, 6.5732002258300781 ], 
-    "PeasAndCarrots" : [ 5.8512001037597656, 7.0636000633239746, 6.5918002128601074 ] 
+    "PeasAndCarrots" : [ 5.8512001037597656, 7.0636000633239746, 6.5918002128601074 ] ,
+    #"Coke" : [ 8.3555002212524414, 7.1121001243591309, 6.6055998802185059 ]
+    "redtea" : [ 11.035800933837891, 6.326200008392334, 4.2154998779296875 ],
 }
 
 class_ids: {
@@ -122,7 +134,9 @@ class_ids: {
     "GranolaBars"       : 33, 
     "Peaches"           : 34,
     "GreenBeans"        : 35, 
-    "PeasAndCarrots"    : 36 
+    "PeasAndCarrots"    : 36,
+    "Coke"              : 37,
+    "redtea"            : 38
 }
 
 draw_colors: {

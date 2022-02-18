@@ -122,13 +122,19 @@ class DopeNode(object):
         self.config_detect.thresh_map = rospy.get_param('~thresh_map', 0.01)
         self.config_detect.sigma = rospy.get_param('~sigma', 3)
         self.config_detect.thresh_points = rospy.get_param("~thresh_points", 0.1)
-
+        self.config_detect.backbone = rospy.get_param("~backbone", "dope")
         # For each object to detect, load network model, create PNP solver, and start ROS publishers
+        # print(rospy.get_param('~architecture'))
         for model, weights_url in rospy.get_param('~weights').items():
+            try:
+                architecture =rospy.get_param('~architectures')[model]
+            except KeyError:
+                 architecture = 'dope'
             self.models[model] = \
                 ModelData(
                     model,
-                    resource_retriever.get_filename(weights_url, use_protocol=False)
+                    resource_retriever.get_filename(weights_url, use_protocol=False),
+                    architecture = architecture
                 )
             self.models[model].load_net_model()
 

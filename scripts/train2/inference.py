@@ -160,7 +160,7 @@ class DopeNode(object):
 
         # Update camera matrix and distortion coefficients
         if self.input_is_rectified:
-            P = np.matrix(camera_info['camera_matrix']['data'], dtype='float64').copy()
+            P = np.matrix(camera_info['projection_matrix']['data'], dtype='float64').copy()
             P.resize((3, 4))
             camera_matrix = P[:, :3]
             dist_coeffs = np.zeros((4, 1))
@@ -300,12 +300,12 @@ if __name__ == "__main__":
         import pyrealsense2 as rs
         # Configure depth and color streams
         pipeline = rs.pipeline()
-        config = rs.config()
-        config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-        config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+        realsence_config = rs.config()
+        realsence_config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+        realsence_config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 
         # Start streaming
-        pipeline.start(config)
+        pipeline.start(realsence_config)
 
 
     # create the output folder
@@ -358,6 +358,7 @@ if __name__ == "__main__":
         else:
             if i_image >= len(imgs):
                 i_image =0
+                break
                 
             frame = cv2.imread(imgs[i_image])
             print(f"frame {imgsname[i_image]}")
