@@ -180,7 +180,7 @@ class DopeMobileNetV3_Large(nn.Module):
         # should this go before the upsample?
         # self.upsample.add_module('4', nn.Conv2d(1280, 640,
         #     kernel_size=3, stride=1, padding=1))
-        self.upsample.add_module('44',InvertedResidual(1280, 640, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+        self.upsample.add_module('44',InvertedResidual(960, 640, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
         # self.upsample.add_module('55',InvertedResidual(1280, 640, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
 
         # self.upsample.add_module('5', nn.ReLU(inplace=True))
@@ -271,7 +271,7 @@ class DopeMobileNetV3_Small(nn.Module):
         # should this go before the upsample?
         # self.upsample.add_module('4', nn.Conv2d(1280, 640,
         #     kernel_size=3, stride=1, padding=1))
-        self.upsample.add_module('44',InvertedResidual(1280, 640, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+        # self.upsample.add_module('44',InvertedResidual(1280, 640, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
         # self.upsample.add_module('55',InvertedResidual(1280, 640, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
 
         # self.upsample.add_module('5', nn.ReLU(inplace=True))
@@ -285,7 +285,7 @@ class DopeMobileNetV3_Small(nn.Module):
         # self.upsample.add_module('15', nn.ReLU(inplace=True))
         # self.upsample.add_module('16', nn.Conv2d(160, 64,
         #     kernel_size=3, stride=1, padding=0))
-        self.upsample.add_module('55',InvertedResidual(640, 320, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+        self.upsample.add_module('55',InvertedResidual(576, 320, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
         self.upsample.add_module('56',InvertedResidual(320, 64, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
 
         # set 50,50
