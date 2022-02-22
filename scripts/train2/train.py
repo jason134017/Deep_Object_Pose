@@ -299,18 +299,22 @@ elif opt.network == 'mobile':
     opt.sigma = 0.5
     net = DopeMobileNet() 
 
-elif opt.network == 'mobilev3_large':
+elif opt.network == 'mobileV3_Large':
     net = ()
     output_size = 50
     opt.sigma = 0.5
     net = DopeMobileNetV3_Large() 
 
-elif opt.network == 'mobilev3_small':
+elif opt.network == 'mobileV3_Small':
     net = ()
     output_size = 50
     opt.sigma = 0.5
     net = DopeMobileNetV3_Small() 
-
+elif opt.network == 'EfficientNet_B0':
+    net = ()
+    output_size = 50
+    opt.sigma = 0.5
+    net = DopeEfficientNet_B0()
 elif opt.network == 'EfficientNet_B1':
     net = ()
     output_size = 50

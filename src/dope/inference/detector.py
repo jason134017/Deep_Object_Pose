@@ -640,10 +640,12 @@ class ModelData(object):
             net = DopeNetwork()
         elif(self.architecture == 'mobile'):
             net = DopeMobileNet()
-        elif(self.architecture == 'mobilev3_Small'):
+        elif(self.architecture == 'mobileV3_Small'):
             net = DopeMobileNetV3_Small()
-        elif(self.architecture == 'mobilev3_large'):
+        elif(self.architecture == 'mobileV3_Large'):
             net = DopeMobileNetV3_Large()
+        elif(self.architecture == 'EfficientNet_B0'):
+            net = DopeEfficientNet_B0()
         elif(self.architecture == 'EfficientNet_B1'):
             net = DopeEfficientNet_B1()
         elif(self.architecture == 'EfficientNet_B2'):
