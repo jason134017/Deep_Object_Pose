@@ -8,18 +8,25 @@ import random
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--samedir",
-     action='store_true',
+    action='store_true',
     help='store in same dir')
 parser.add_argument("--start",
+    type=int,
     default= 0,
     help='start dir index')
 
 parser.add_argument("--end",
+    type=int,
     default= 1,
     help='start dir index')
 parser.add_argument("--thread",
     default= 1,
     help='start dir index')
+parser.add_argument(
+    '--nb_frames',
+    default=2000,
+    help = "how many frames to save"
+)
 parser.add_argument(
     '--nb_objects',
     default=28,
@@ -66,14 +73,14 @@ parser.add_argument(
     help = "dome light hdr"
 )
 opt = parser.parse_args()
-print(str(opt.outf))
+
 
 commands = []
 # 20 000 images
 for i in range(opt.start,opt.end):
     
     # commands.append(f'python single_video_pybullet2.py --spp 10000 --nb_frames 100 --nb_objects {str(int(random.uniform(5,10)))} --outf dataset_redtea/{str(i).zfill(3)} --nb_distractors 0')
-    commands.append(f'python single_video_pybullet.py --spp 10000 --nb_frames 100 --outf {str(opt.outf)}/{str(i).zfill(3)}  \
+    commands.append(f'python single_video_pybullet.py --spp 10000 --nb_frames {opt.nb_frames} --outf {str(opt.outf)}/{str(i).zfill(3)}  \
 --objs_folder {opt.objs_folder} --nb_objects {opt.nb_objects} --nb_distractors {opt.nb_distractors} \
 --objs_folder_distrators {opt.objs_folder_distrators} --skyboxes_folder {opt.skyboxes_folder}')
     # print(commands[-1])

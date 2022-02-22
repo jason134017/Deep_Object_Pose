@@ -12,6 +12,8 @@ import time
 from os import path
 
 import numpy as np
+from scripts.train2.models import DopeMobileNetV3_Small
+
 import torch
 import torch.nn as nn
 import torchvision.models as models
@@ -21,6 +23,10 @@ from torch.autograd import Variable
 
 from dope.utils import get_image_grid
 
+import sys
+# Import the  module
+sys.path.insert(0, path.join(path.dirname(__file__), ".."))
+from scripts.train2.models import *
 # Import the definition of the neural network model and cuboids
 
 #global transform for image input
@@ -630,10 +636,28 @@ class ModelData(object):
         model_loading_start_time = time.time()
         print("Loading DOPE model '{}'...".format(path))
         print("Ues Backbone model '{}'...".format(self.architecture))
-        if(self.architecture == 'mobile'):
-            net = DopeMobileNet()
-        elif(self.architecture == 'dope'):
+        if(self.architecture == 'dope'):
             net = DopeNetwork()
+        elif(self.architecture == 'mobile'):
+            net = DopeMobileNet()
+        elif(self.architecture == 'mobilev3_Small'):
+            net = DopeMobileNetV3_Small()
+        elif(self.architecture == 'mobilev3_large'):
+            net = DopeMobileNetV3_Large()
+        elif(self.architecture == 'EfficientNet_B1'):
+            net = DopeEfficientNet_B1()
+        elif(self.architecture == 'EfficientNet_B2'):
+            net = DopeEfficientNet_B2()
+        elif(self.architecture == 'EfficientNet_B3'):
+            net = DopeEfficientNet_B3()
+        elif(self.architecture == 'EfficientNet_B4'):
+            net = DopeEfficientNet_B4()
+        elif(self.architecture == 'EfficientNet_B5'):
+            net = DopeEfficientNet_B5()
+        elif(self.architecture == 'EfficientNet_B6'):
+            net = DopeEfficientNet_B6()
+        elif(self.architecture == 'EfficientNet_B7'):
+            net = DopeEfficientNet_B7()
         net = torch.nn.DataParallel(net, [0]).cuda()
         net.load_state_dict(torch.load(path))
         net.eval()

@@ -310,12 +310,41 @@ elif opt.network == 'mobilev3_small':
     opt.sigma = 0.5
     net = DopeMobileNetV3_Small() 
 
-elif opt.network == 'EfficientNet':
+elif opt.network == 'EfficientNet_B1':
     net = ()
     output_size = 50
     opt.sigma = 0.5
-    net = DopeEfficientNet()  
-      
+    net = DopeEfficientNet_B1() 
+elif opt.network == 'EfficientNet_B2':
+    net = ()
+    output_size = 50
+    opt.sigma = 0.5
+    net = DopeEfficientNet_B2() 
+elif opt.network == 'EfficientNet_B3':
+    net = ()
+    output_size = 50
+    opt.sigma = 0.5
+    net = DopeEfficientNet_B3()     
+elif opt.network == 'EfficientNet_B4':
+    net = ()
+    output_size = 50
+    opt.sigma = 0.5
+    net = DopeEfficientNet_B4()     
+elif opt.network == 'EfficientNet_B5':
+    net = ()
+    output_size = 50
+    opt.sigma = 0.5
+    net = DopeEfficientNet_B5()     
+elif opt.network == 'EfficientNet_B6':
+    net = ()
+    output_size = 50
+    opt.sigma = 0.5
+    net = DopeEfficientNet_B6()     
+elif opt.network == 'EfficientNet_B7':
+    net = ()
+    output_size = 50
+    opt.sigma = 0.5
+    net = DopeEfficientNet_B7()     
 elif opt.network == 'boundary':
 
     # if not opt.net_dope is None:
