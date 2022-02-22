@@ -32,6 +32,7 @@ from torch.autograd import Variable
 import torchvision.models as models
 import datetime
 import json
+from tqdm import tqdm
 
 from tensorboardX import SummaryWriter
 
@@ -473,7 +474,7 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
     loss_avg_to_log['loss_affinities'] = []
     loss_avg_to_log['loss_belief'] = []
     loss_avg_to_log['loss_class'] = []
-    for batch_idx, targets in enumerate(train_loader):
+    for batch_idx, targets in enumerate(tqdm(train_loader)):
         optimizer.zero_grad()
         logged = 0
 
