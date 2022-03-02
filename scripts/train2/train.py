@@ -631,6 +631,11 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
                     print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.15f}'.format(
                         epoch, batch_idx * len(data), len(train_loader.dataset),
                         100. * batch_idx / len(train_loader), loss.item()))
+                    
+                    writer.add_scalar('loss/train_loss_batch',np.mean(loss_avg_to_log["loss"]),epoch)
+                    writer.add_scalar('loss/train_cls_batch',np.mean(loss_avg_to_log["loss_class"]),epoch)
+                    writer.add_scalar('loss/train_aff_batch',np.mean(loss_avg_to_log["loss_affinities"]),epoch)
+                    writer.add_scalar('loss/train_bel_batch',np.mean(loss_avg_to_log["loss_belief"]),epoch)
 
                 else:
                     print('Test  Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.15f}'.format(
@@ -653,7 +658,6 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
         else:
             # import pandas as pd
             # add the loss
-
             writer.add_scalar('loss/test_loss',np.mean(loss_avg_to_log["loss"]),epoch)
             writer.add_scalar('loss/test_cls',np.mean(loss_avg_to_log["loss_class"]),epoch)
             writer.add_scalar('loss/test_aff',np.mean(loss_avg_to_log["loss_affinities"]),epoch)
