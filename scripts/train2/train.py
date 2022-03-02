@@ -443,8 +443,9 @@ best_results = {"epoch":None,'passed':None,'add_mean':None,"add_std":None}
 
 scaler = torch.cuda.amp.GradScaler() 
 
+step_count = 0
 def _runnetwork(epoch,train_loader,train=True,syn=False):
-    global nb_update_network
+    global nb_update_network,step_count
     # net
     if train:
         net.train()
@@ -632,11 +633,11 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
                         epoch, batch_idx * len(data), len(train_loader.dataset),
                         100. * batch_idx / len(train_loader), loss.item()))
                     
-                    writer.add_scalar('loss/train_loss_batch',np.mean(loss_avg_to_log["loss"]),epoch)
-                    writer.add_scalar('loss/train_cls_batch',np.mean(loss_avg_to_log["loss_class"]),epoch)
-                    writer.add_scalar('loss/train_aff_batch',np.mean(loss_avg_to_log["loss_affinities"]),epoch)
-                    writer.add_scalar('loss/train_bel_batch',np.mean(loss_avg_to_log["loss_belief"]),epoch)
-
+                    writer.add_scalar('loss/train_loss_batch',np.mean(loss_avg_to_log["loss"]),step_count)
+                    writer.add_scalar('loss/train_cls_batch',np.mean(loss_avg_to_log["loss_class"]),step_count)
+                    writer.add_scalar('loss/train_aff_batch',np.mean(loss_avg_to_log["loss_affinities"]),step_count)
+                    writer.add_scalar('loss/train_bel_batch',np.mean(loss_avg_to_log["loss_belief"]),step_count)
+                    step_count = step_count+1
                 else:
                     print('Test  Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.15f}'.format(
                         epoch, batch_idx * len(data), len(train_loader.dataset),
