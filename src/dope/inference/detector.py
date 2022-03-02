@@ -12,7 +12,7 @@ import time
 from os import path
 
 import numpy as np
-from scripts.train2.models import DopeMobileNetV3_Small
+#from scripts.train2.models import DopeMobileNetV3_Small
 
 import torch
 import torch.nn as nn
@@ -25,7 +25,10 @@ from dope.utils import get_image_grid
 
 import sys
 # Import the  module
-sys.path.insert(0, path.join(path.dirname(__file__), ".."))
+from pathlib import Path
+Path(path.dirname(__file__)).parent.parent.parent
+#sys.path.insert(0, path.join(path.dirname(__file__), "../../"))
+sys.path.append(str(Path(path.dirname(__file__)).parent.parent.parent))
 from scripts.train2.models import *
 # Import the definition of the neural network model and cuboids
 
