@@ -54,7 +54,8 @@ weights: {
     #"Applemilk":"package://dope/weights/Applemilk60.pth",
     #"redtea":"package://dope/weights/redtea0119.pth",
     #"redtea":"package://dope/weights/redtea0120/net_epoch_72.pth",
-    "redtea":"package://dope/weights/redtea_mobile88.pth",
+    #"redtea":"package://dope/weights/redtea_mobile88.pth",
+    "redtea":"package://dope/weights/reatea_b0.pth",
 
 }
 
@@ -63,7 +64,7 @@ architectures: {
     #'pudding':"dope",
     #'alphabet_soup':'resnet_simple', 
     'AlphabetSoup':'dope',  
-    'redtea':'mobile'
+    'redtea':'EfficientNet_B0'
 }
 
 

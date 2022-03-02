@@ -1,1 +1,2 @@
-./scripts/nvisii_data_gen/output/
+scripts/nvisii_data_gen/output/
+__pycache__/
