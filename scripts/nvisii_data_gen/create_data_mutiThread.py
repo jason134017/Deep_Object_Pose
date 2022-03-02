@@ -39,6 +39,12 @@ parser.add_argument(
     help = "how many objects"
 )
 parser.add_argument(
+    '--spp',
+    default=4000,
+    type=int,
+    help = "number of sample per pixel, higher the more costly"
+)
+parser.add_argument(
     '--outf',
     default='output_test',
     help = "output filename inside output/"
@@ -80,7 +86,7 @@ commands = []
 for i in range(opt.start,opt.end):
     
     # commands.append(f'python single_video_pybullet2.py --spp 10000 --nb_frames 100 --nb_objects {str(int(random.uniform(5,10)))} --outf dataset_redtea/{str(i).zfill(3)} --nb_distractors 0')
-    commands.append(f'python single_video_pybullet.py --spp 10000 --nb_frames {opt.nb_frames} --outf {str(opt.outf)}/{str(i).zfill(3)}  \
+    commands.append(f'python single_video_pybullet.py --spp {opt.spp} --nb_frames {opt.nb_frames} --outf {str(opt.outf)}/{str(i).zfill(3)}  \
 --objs_folder {opt.objs_folder} --nb_objects {opt.nb_objects} --nb_distractors {opt.nb_distractors} \
 --objs_folder_distrators {opt.objs_folder_distrators} --skyboxes_folder {opt.skyboxes_folder}')
     # print(commands[-1])
