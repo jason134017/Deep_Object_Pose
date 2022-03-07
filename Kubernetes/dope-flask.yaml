@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dope-flask
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: dope-flask
+  template:
+    metadata:
+      labels:
+        app: dope-flask
+    spec:
+      containers:
+      - name: dope-flask
+        image: jason134017/dope-flask:latest
+        # volumeMounts:
+        #   - mountPath: /root/catkin_ws/src/dope/weights/ 
+        #     name: weights-volume
+        # command: ["/bin/sleep","365d"]
+        # tty: true
+        # args:
+        # - roscore
+        # - roslaunch
+        # - --screen
+        # - --wait
+        # - dope
+        # - dope.launch
+        # env:
+        #   - name: ROS_IP
+        #     valueFrom:
+        #       fieldRef:
+        #         fieldPath: status.podIP
+        #   - name: ROS_MASTER_URI
+        #     value: "http://airobot-RobticArm:11311"
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "100m"
+            # nvidia.com/gpu: 1
+        ports:
+        - containerPort: 8888
+      imagePullSecrets:
+        - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dope-flask-service
+spec:
+  selector:
+    app: dope-flask
+  type: NodePort
+  ports:
+  - port: 8888
+    targetPort: 8888
+    #nodeport: 30000
+# ---
+# kind: PersistentVolumeClaim
+# apiVersion: v1
+# metadata:
+#   name: pv-claim
+# spec:
+#   accessModes:
+#   - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 2Gi   <=== 要求 1G 容量

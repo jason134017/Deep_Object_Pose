@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.24.0 (4a2a0458)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: geckodriver
+  name: geckodriver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: geckodriver
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.24.0 (4a2a0458)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: geckodriver
+    spec:
+      containers:
+        - env:
+            - name: DISABLE_X11
+              value: "false"
+            - name: ENABLE_VNC
+              value: "true"
+            - name: EXPOSE_X11
+              value: "true"
+          image: blueimp/geckodriver
+          name: geckodriver
+          ports:
+            - containerPort: 5900
+          resources: {}
+          volumeMounts:
+            - mountPath: /home/webdriver/assets
+              name: geckodriver-claim0
+              readOnly: true
+            - mountPath: /tmp
+              name: geckodriver-tmpfs0
+      restartPolicy: Always
+      volumes:
+        - name: geckodriver-claim0
+          persistentVolumeClaim:
+            claimName: geckodriver-claim0
+            readOnly: true
+        - emptyDir:
+            medium: Memory
+          name: geckodriver-tmpfs0
+status: {}

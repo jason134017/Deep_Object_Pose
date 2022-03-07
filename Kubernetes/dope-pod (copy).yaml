@@ -1,0 +1,14 @@
+# my-first-pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dope-pod
+spec:
+  containers:
+  - name: dope-pod-demo
+    image: jason134017/dope:latest
+    resources:
+      limits:
+        nvidia.com/gpu: 1 # requesting 2 GPUs
+  imagePullSecrets:
+  - name: regcred
