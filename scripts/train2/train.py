@@ -681,9 +681,9 @@ for epoch in range(1, opt.epochs + 1):
     try:
         if opt.local_rank == 0:
             if not opt.dontsave is True:
-                torch.save(net.state_dict(), f'{opt.outf}/net_{opt.namefile}_{str(epoch).zfill(2)}.pth')
+                torch.save(net.state_dict(), f'{opt.outf}/net_{opt.namefile}_{opt.network}_{str(epoch).zfill(2)}.pth')
             else:
-                torch.save(net.state_dict(), f'{opt.outf}/net_{opt.namefile}.pth')
+                torch.save(net.state_dict(), f'{opt.outf}/net_{opt.namefile}_{opt.network}.pth')
     except:
         pass
 

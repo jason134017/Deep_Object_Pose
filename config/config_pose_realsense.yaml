@@ -56,6 +56,7 @@ weights: {
     #"redtea":"package://dope/weights/redtea0120/net_epoch_72.pth",
     #"redtea":"package://dope/weights/redtea_mobile88.pth",
     "redtea":"package://dope/weights/reatea_b0.pth",
+    #"milktea":"package://dope/weights/reatea_b0.pth",
 
 }
 
@@ -64,7 +65,8 @@ architectures: {
     #'pudding':"dope",
     #'alphabet_soup':'resnet_simple', 
     'AlphabetSoup':'dope',  
-    'redtea':'EfficientNet_B0'
+    'redtea':'EfficientNet_B0',
+    'milktea':'dope'
 }
 
 
@@ -113,6 +115,7 @@ dimensions: {
     #"Coke" : [ 8.3555002212524414, 7.1121001243591309, 6.6055998802185059 ]
     "Applemilk" : [ 23.035800933837891, 7.326200008392334, 7.2154998779296875 ], 
     "redtea" : [ 11.035800933837891, 6.326200008392334, 4.2154998779296875 ], 
+    "milktea" : [ 12.035800933837891, 6.326200008392334, 6.2154998779296875 ], 
 }
 
 class_ids: {
@@ -153,7 +156,8 @@ class_ids: {
     "PeasAndCarrots"    : 36,
     "Coke"              : 37,
     "Applemilk"         : 38,
-    "redtea"            : 39
+    "redtea"            : 39,
+    "milktea"            : 40
 }
 
 draw_colors: {
