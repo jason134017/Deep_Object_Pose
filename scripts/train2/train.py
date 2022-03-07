@@ -271,21 +271,21 @@ else:
     transform = transforms.Compose([
                            transforms.Resize(opt.imagesize),
                            transforms.ToTensor()])
-
-
+# default output_size
+output_size = 400
 # if opt.network == 'resnetsimple':
 #     net = ResnetSimple()
 #     output_size = 208
     
 if opt.network == 'dope':
     net = DopeNetwork()
-    output_size = 50
-    opt.sigma = 0.5
+    # output_size = 50
+    # opt.sigma = 0.5
 
 elif opt.network == 'full':
     net = ()
-    output_size = 400
-    opt.sigma = 2
+    # output_size = 400
+    # opt.sigma = 2
     net = DreamHourglassMultiStage(
         9,
         n_stages = 2,
@@ -295,60 +295,60 @@ elif opt.network == 'full':
 
 elif opt.network == 'mobile':
     net = ()
-    output_size = 50
-    opt.sigma = 0.5
+    # output_size = 50
+    # opt.sigma = 0.5
     net = DopeMobileNet() 
 
 elif opt.network == 'mobileV3_Large':
     net = ()
-    output_size = 50
-    opt.sigma = 0.5
+    # output_size = 50
+    # opt.sigma = 0.5
     net = DopeMobileNetV3_Large() 
 
 elif opt.network == 'mobileV3_Small':
     net = ()
-    output_size = 50
-    opt.sigma = 0.5
+    # output_size = 50
+    # opt.sigma = 0.5
     net = DopeMobileNetV3_Small() 
 elif opt.network == 'EfficientNet_B0':
     net = ()
-    output_size = 50
-    opt.sigma = 0.5
+    # output_size = 50
+    # opt.sigma = 0.5
     net = DopeEfficientNet_B0()
 elif opt.network == 'EfficientNet_B1':
     net = ()
-    output_size = 50
-    opt.sigma = 0.5
+    # output_size = 50
+    # opt.sigma = 0.5
     net = DopeEfficientNet_B1() 
 elif opt.network == 'EfficientNet_B2':
     net = ()
-    output_size = 50
-    opt.sigma = 0.5
+    # output_size = 50
+    # opt.sigma = 0.5
     net = DopeEfficientNet_B2() 
 elif opt.network == 'EfficientNet_B3':
     net = ()
-    output_size = 50
+    # output_size = 50
     opt.sigma = 0.5
     net = DopeEfficientNet_B3()     
 elif opt.network == 'EfficientNet_B4':
     net = ()
-    output_size = 50
-    opt.sigma = 0.5
+    # output_size = 50
+    # opt.sigma = 0.5
     net = DopeEfficientNet_B4()     
 elif opt.network == 'EfficientNet_B5':
     net = ()
-    output_size = 50
-    opt.sigma = 0.5
+    # output_size = 50
+    # opt.sigma = 0.5
     net = DopeEfficientNet_B5()     
 elif opt.network == 'EfficientNet_B6':
     net = ()
-    output_size = 50
-    opt.sigma = 0.5
+    # output_size = 50
+    # opt.sigma = 0.5
     net = DopeEfficientNet_B6()     
 elif opt.network == 'EfficientNet_B7':
     net = ()
-    output_size = 50
-    opt.sigma = 0.5
+    # output_size = 50
+    # opt.sigma = 0.5
     net = DopeEfficientNet_B7()     
 elif opt.network == 'boundary':
 
@@ -359,8 +359,8 @@ elif opt.network == 'boundary':
     #     net_dope.load_state_dict(tmp)
 
     net = BoundaryAwareNet(opt.net_dope)
-    output_size = 50
-    opt.sigma = 1
+    # output_size = 50
+    # opt.sigma = 1
 
 else:
     print(f'network {opt.network} does not exists')

@@ -279,7 +279,7 @@ else:
     
 if opt.network == 'dope':
     net = DopeNetwork()
-    output_size = 50
+    #output_size = 50
     opt.sigma = 0.5
 
 elif opt.network == 'full':
@@ -295,7 +295,7 @@ elif opt.network == 'full':
 
 elif opt.network == 'mobile':
     net = ()
-    output_size = 50
+    # output_size = 50
     opt.sigma = 0.5
     net = DopeMobileNet() 
     
@@ -308,7 +308,7 @@ elif opt.network == 'boundary':
     #     net_dope.load_state_dict(tmp)
 
     net = BoundaryAwareNet(opt.net_dope)
-    output_size = 50
+    # output_size = 50
     opt.sigma = 1
 
 else:
