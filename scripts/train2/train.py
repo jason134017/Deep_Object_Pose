@@ -127,7 +127,7 @@ parser.add_argument('--dontsave', action="store_true", default=False,help='dont_
 parser.add_argument("--pretrained",default=True,help='do you want to have pretrained weights')
 
 # Feature extractor
-parser.add_argument('--features', default="vgg", help='vgg or resnet')
+# parser.add_argument('--features', default="vgg", help='vgg or resnet')
 
 # datasize is used 
 parser.add_argument('--datasize', default=None, help='the size in absolute to use, e.g. 2000') 
@@ -423,8 +423,12 @@ net = torch.nn.parallel.DistributedDataParallel(net.cuda(),
     output_device=opt.local_rank)
 # print(net)
 
+step_count = 0
+start_epoch = 1
 if opt.net != '':
     net.load_state_dict(torch.load(opt.net))
+    start_epoch = int(str(opt.net)[-7:-4]) + 1
+
 
 parameters = filter(lambda p: p.requires_grad, net.parameters())
 optimizer = optim.Adam(parameters,lr=opt.lr)
@@ -443,7 +447,6 @@ best_results = {"epoch":None,'passed':None,'add_mean':None,"add_std":None}
 
 scaler = torch.cuda.amp.GradScaler() 
 
-step_count = 0
 def _runnetwork(epoch,train_loader,train=True,syn=False):
     global nb_update_network,step_count
     # net
@@ -479,10 +482,10 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
     loss_avg_to_log['loss_affinities'] = []
     loss_avg_to_log['loss_belief'] = []
     loss_avg_to_log['loss_class'] = []
+    step_count= int(len(train_loader)/opt.loginterval*(start_epoch-1))
     for batch_idx, targets in enumerate(tqdm(train_loader)):
         optimizer.zero_grad()
         logged = 0
-
         data = Variable(targets['img'].cuda())
         target_belief = Variable(targets['beliefs'].cuda())        
         target_affinities = Variable(targets['affinities'].cuda())
@@ -553,8 +556,10 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
 
             if train:
                 post = "train"
-                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.15f}'.format(
+                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tStep: {}\tLoss: {:.15f}'.format(
                     epoch, batch_idx * len(data), len(train_loader.dataset),
+                    0,
+                    int(step_count),
                     100. * batch_idx / len(train_loader), loss.item()))
             else:
                 post = 'test'
@@ -616,12 +621,12 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
             # scaler.update()
             nb_update_network+=1
             
-            #write to file 
-            namefile = '/loss_train.txt'
-            with open (opt.outf+namefile,'a') as file:
-                s = '{}, {},{:.15f}\n'.format(
-                    epoch,batch_idx,loss.item()) 
-                file.write(s)
+            # write to file 
+            # namefile = '/loss_train.txt'
+            # with open (opt.outf+namefile,'a') as file:
+            #     s = '{}, {},{:.15f}\n'.format(
+            #         epoch,batch_idx,loss.item()) 
+            #     file.write(s)
         
         # log the loss
         loss_avg_to_log["loss"].append(loss.item())
@@ -635,12 +640,21 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
                     # print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.15f}'.format(
                     #     epoch, batch_idx * len(data), len(train_loader.dataset),
                     #     100. * batch_idx / len(train_loader), loss.item()))
-                    
+
+                    # write to tensorboard
                     writer.add_scalar('loss/train_loss_batch',np.mean(loss_avg_to_log["loss"]),step_count)
                     writer.add_scalar('loss/train_cls_batch',np.mean(loss_avg_to_log["loss_class"]),step_count)
                     writer.add_scalar('loss/train_aff_batch',np.mean(loss_avg_to_log["loss_affinities"]),step_count)
                     writer.add_scalar('loss/train_bel_batch',np.mean(loss_avg_to_log["loss_belief"]),step_count)
                     step_count = step_count+1
+
+                    # write to txt
+                    namefile = '/loss_train.txt'
+                    with open (opt.outf+namefile,'a') as file:
+                        s = '{}, {},{:.15f}\n'.format(
+                            epoch,batch_idx,loss.item()) 
+                        file.write(s)
+                
                 else:
                     print('Test  Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.15f}'.format(
                         epoch, batch_idx * len(data), len(train_loader.dataset),
@@ -667,7 +681,7 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
             writer.add_scalar('loss/test_aff',np.mean(loss_avg_to_log["loss_affinities"]),epoch)
             writer.add_scalar('loss/test_bel',np.mean(loss_avg_to_log["loss_belief"]),epoch)
 
-for epoch in range(1, opt.epochs + 1):
+for epoch in range(start_epoch, opt.epochs + 1):
 
     if not trainingdata is None and not opt.testonly:
         _runnetwork(epoch,trainingdata)
@@ -681,7 +695,7 @@ for epoch in range(1, opt.epochs + 1):
     try:
         if opt.local_rank == 0:
             if not opt.dontsave is True:
-                torch.save(net.state_dict(), f'{opt.outf}/net_{opt.namefile}_{opt.network}_{str(epoch).zfill(2)}.pth')
+                torch.save(net.state_dict(), f'{opt.outf}/net_{opt.namefile}_{opt.network}_{str(epoch).zfill(3)}.pth')
             else:
                 torch.save(net.state_dict(), f'{opt.outf}/net_{opt.namefile}_{opt.network}.pth')
     except:
@@ -691,6 +705,6 @@ for epoch in range(1, opt.epochs + 1):
         break
 # print(best_results)
 if opt.local_rank == 0:
-    torch.save(net.state_dict(), f'{opt.outf}/net_{opt.namefile}_{str(epoch).zfill(2)}.pth')
+    torch.save(net.state_dict(), f'{opt.outf}/net_{opt.namefile}_{str(epoch).zfill(3)}.pth')
 print ("end:" , datetime.datetime.now().time())
 
