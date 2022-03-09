@@ -139,7 +139,11 @@ parser.add_argument('--data2', default=None, help='path to dataset2')
 parser.add_argument('--size1', default=None, help='size of dataset1 in percentage (0,1)')
 parser.add_argument('--size2', default=None, help='size of dataset2 in percentage (0,1)')
 parser.add_argument("--local_rank", type=int)
-
+# parser.add_argument('--gpuids',
+#     nargs='+', 
+#     type=int, 
+#     default=[0], 
+#     help='GPUs to use')
 # Read the config but do not overwrite the args written 
 args, remaining_argv = conf_parser.parse_known_args()
 defaults = { "option":"default" }
@@ -243,7 +247,7 @@ if opt.local_rank == 0:
 
 random.seed(opt.manualseed)
 
-
+# os.environ['LOCAL_RANK'] = opt.local_rank
 torch.cuda.set_device(opt.local_rank)
 torch.distributed.init_process_group(backend='NCCL',
                                      init_method='env://')
@@ -558,9 +562,7 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
                 post = "train"
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tStep: {}\tLoss: {:.15f}'.format(
                     epoch, batch_idx * len(data), len(train_loader.dataset),
-                    0,
-                    int(step_count),
-                    100. * batch_idx / len(train_loader), loss.item()))
+                    100. * batch_idx / len(train_loader), int(step_count), loss.item()))
             else:
                 post = 'test'
 
@@ -705,6 +707,6 @@ for epoch in range(start_epoch, opt.epochs + 1):
         break
 # print(best_results)
 if opt.local_rank == 0:
-    torch.save(net.state_dict(), f'{opt.outf}/net_{opt.namefile}_{str(epoch).zfill(3)}.pth')
+    torch.save(net.state_dict(), f'{opt.outf}/net_{opt.namefile}_{opt.network}_{str(epoch).zfill(3)}.pth')
 print ("end:" , datetime.datetime.now().time())
 
