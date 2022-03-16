@@ -80,7 +80,7 @@ class DopeMobileNet(nn.Module):
         ):
         super(DopeMobileNet, self).__init__()
 
-        self.mobile_feature = torch.hub.load('pytorch/vision:v0.6.0', 'mobilenet_v2', pretrained=True).features
+        self.mobile_feature = torch.hub.load('pytorch/vision:v0.6.0', 'mobilenet_v2', pretrained=pretrained).features
 
         # upsample to 50x50 from 13x13
         self.upsample = nn.Sequential()
@@ -172,7 +172,7 @@ class DopeMobileNetV3_Large(nn.Module):
         super(DopeMobileNetV3_Large, self).__init__()
 
         #self.mobile_feature = torch.hub.load('pytorch/vision:v0.6.0', 'mobilenet_v2', pretrained=True).features
-        self.mobile_feature =  models.mobilenet_v3_large(pretrained=True).features
+        self.mobile_feature =  models.mobilenet_v3_large(pretrained=pretrained).features
         # upsample to 50x50 from 13x13
         self.upsample = nn.Sequential()
         self.upsample.add_module('0', nn.Upsample(scale_factor=2))
@@ -263,7 +263,7 @@ class DopeMobileNetV3_Small(nn.Module):
         super(DopeMobileNetV3_Small, self).__init__()
 
         #self.mobile_feature = torch.hub.load('pytorch/vision:v0.6.0', 'mobilenet_v2', pretrained=True).features
-        self.mobile_feature =  models.mobilenet_v3_small(pretrained=True).features
+        self.mobile_feature =  models.mobilenet_v3_small(pretrained=pretrained).features
         # upsample to 50x50 from 13x13
         self.upsample = nn.Sequential()
         self.upsample.add_module('0', nn.Upsample(scale_factor=2))
@@ -354,7 +354,7 @@ class DopeEfficientNet_B0(nn.Module):
         ):
         super(DopeEfficientNet_B0, self).__init__()
 
-        self.efficientNet_feature = models.efficientnet_b0(pretrained=True).features
+        self.efficientNet_feature = models.efficientnet_b0(pretrained=pretrained).features
 
         # upsample to 50x50 from 13x13
         self.upsample = nn.Sequential()
@@ -435,7 +435,6 @@ class DopeEfficientNet_B0(nn.Module):
         return  [belief_0,belief_1,belief_2],\
                 [aff_0,aff_1,aff_2]
 
-
 #EfficientNet b1
 class DopeEfficientNet_B1(nn.Module):
     def __init__(
@@ -447,7 +446,7 @@ class DopeEfficientNet_B1(nn.Module):
         ):
         super(DopeEfficientNet_B1, self).__init__()
 
-        self.efficientNet_feature = models.efficientnet_b1(pretrained=True).features
+        self.efficientNet_feature = models.efficientnet_b1(pretrained=pretrained).features
 
         # upsample to 50x50 from 13x13
         self.upsample = nn.Sequential()
@@ -539,7 +538,7 @@ class DopeEfficientNet_B2(nn.Module):
         ):
         super(DopeEfficientNet_B2, self).__init__()
 
-        self.efficientNet_feature = models.efficientnet_b2(pretrained=True).features
+        self.efficientNet_feature = models.efficientnet_b2(pretrained=pretrained).features
 
         # upsample to 50x50 from 13x13
         self.upsample = nn.Sequential()
@@ -631,7 +630,7 @@ class DopeEfficientNet_B3(nn.Module):
         ):
         super(DopeEfficientNet_B3, self).__init__()
 
-        self.efficientNet_feature = models.efficientnet_b3(pretrained=True).features
+        self.efficientNet_feature = models.efficientnet_b3(pretrained=pretrained).features
 
         # upsample to 50x50 from 13x13
         self.upsample = nn.Sequential()
@@ -712,7 +711,6 @@ class DopeEfficientNet_B3(nn.Module):
         return  [belief_0,belief_1,belief_2],\
                 [aff_0,aff_1,aff_2]
 
-
 #EfficientNet b4
 class DopeEfficientNet_B4(nn.Module):
     def __init__(
@@ -724,7 +722,7 @@ class DopeEfficientNet_B4(nn.Module):
         ):
         super(DopeEfficientNet_B4, self).__init__()
 
-        self.efficientNet_feature = models.efficientnet_b4(pretrained=True).features
+        self.efficientNet_feature = models.efficientnet_b4(pretrained=pretrained).features
 
         # upsample to 50x50 from 13x13
         self.upsample = nn.Sequential()
@@ -816,7 +814,7 @@ class DopeEfficientNet_B5(nn.Module):
         ):
         super(DopeEfficientNet_B5, self).__init__()
 
-        self.efficientNet_feature = models.efficientnet_b5(pretrained=True).features
+        self.efficientNet_feature = models.efficientnet_b5(pretrained=pretrained).features
 
         # upsample to 50x50 from 13x13
         self.upsample = nn.Sequential()
@@ -908,7 +906,7 @@ class DopeEfficientNet_B6(nn.Module):
         ):
         super(DopeEfficientNet_B6, self).__init__()
 
-        self.efficientNet_feature = models.efficientnet_b6(pretrained=True).features
+        self.efficientNet_feature = models.efficientnet_b6(pretrained=pretrained).features
 
         # upsample to 50x50 from 13x13
         self.upsample = nn.Sequential()
@@ -1000,7 +998,7 @@ class DopeEfficientNet_B7(nn.Module):
         ):
         super(DopeEfficientNet_B7, self).__init__()
 
-        self.efficientNet_feature = models.efficientnet_b7(pretrained=True).features
+        self.efficientNet_feature = models.efficientnet_b7(pretrained=pretrained).features
 
         # upsample to 50x50 from 13x13
         self.upsample = nn.Sequential()
@@ -1093,7 +1091,7 @@ class DopeNetwork(nn.Module):
 
         self.stop_at_stage = stop_at_stage
 
-        vgg_full = models.vgg19(pretrained=False).features
+        vgg_full = models.vgg19(pretrained=pretrained).features
         self.vgg = nn.Sequential()
         for i_layer in range(24):
             self.vgg.add_module(str(i_layer), vgg_full[i_layer])
@@ -1240,8 +1238,6 @@ class DopeNetwork(nn.Module):
 
         return model
 
-
-
 class BoundaryAwareNet(nn.Module):
     def __init__(
         self,
@@ -1302,9 +1298,6 @@ class BoundaryAwareNet(nn.Module):
 
 
         return output_belief, output_affinity, y_class
-
-
-
 
 class DreamHourglassMultiStage(nn.Module):
     def __init__(self, n_keypoints,
@@ -1774,22 +1767,21 @@ class DreamHourglass(nn.Module):
         return output_head_0,output_head_1
 
 
-if __name__ == '__main__':
-    import torch
-    # n_keypoints = 7
-    # n_joints = 10
-    batch_size = 2
+# if __name__ == '__main__':
+#     # n_keypoints = 7
+#     # n_joints = 10
+#     batch_size = 2
 
-    # print('ResnetSimple')
-    # net = ResnetSimple().cuda()
-    # y = net(torch.zeros(batch_size, 3, 400, 400).cuda())
-    # print(y[0][-1].shape)
-    # print()
-    # del net, y
-    a = torch.sum(torch.zeros(2,9,50,50),dim=1)
-    print(a.shape)
-    # net = BoundaryAwareNet().cuda()
-    net = DopeMobileNet().cuda()
-    y = net(torch.zeros(batch_size, 3, 400, 400).cuda())
+#     # print('ResnetSimple')
+#     # net = ResnetSimple().cuda()
+#     # y = net(torch.zeros(batch_size, 3, 400, 400).cuda())
+#     # print(y[0][-1].shape)
+#     # print()
+#     # del net, y
+#     a = torch.sum(torch.zeros(2,9,50,50),dim=1)
+#     print(a.shape)
+#     # net = BoundaryAwareNet().cuda()
+#     net = DopeMobileNet().cuda()
+#     y = net(torch.zeros(batch_size, 3, 400, 400).cuda())
 
-    # print(y.shape)
+#     # print(y.shape)
