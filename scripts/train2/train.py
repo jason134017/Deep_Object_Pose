@@ -300,9 +300,6 @@ if opt.network == 'dope':
         net = DopeNetwork(pretrained=True)
     else:
         net = DopeNetwork()
-    output_size = 50
-    opt.sigma = 0.5
-
 elif opt.network == 'full':
     net = ()
     output_size = 400
@@ -313,11 +310,7 @@ elif opt.network == 'full':
         internalize_spatial_softmax = False,
         deconv_decoder = False,
         full_output = True)
-
 elif opt.network == 'mobile':
-    # net = ()
-    output_size = 50
-    opt.sigma = 0.5
     if (opt.pretrained):
         net = DopeMobileNet() 
     else:
@@ -399,6 +392,8 @@ if not opt.data == "":
         output_size = output_size,
         objects = opt.objects
         )
+    # print(f"train_dataset: {len(train_dataset)}")
+    print(f"train_dataset: {train_dataset.imgs}")
     trainingdata = torch.utils.data.DataLoader(train_dataset,
         batch_size = opt.batchsize, 
         shuffle = True,
@@ -445,6 +440,9 @@ net = torch.nn.parallel.DistributedDataParallel(net.cuda(),
 
 step_count = 0
 start_epoch = 1
+#(40000  1 1000)
+save_log_points = 1000
+
 if opt.net != '':
     net.load_state_dict(torch.load(opt.net))
     start_epoch = int(str(opt.net)[-7:-4]) + 1
@@ -468,8 +466,7 @@ best_results = {"epoch":None,'passed':None,'add_mean':None,"add_std":None}
 scaler = torch.cuda.amp.GradScaler() 
 
 def _runnetwork(epoch,train_loader,train=True,syn=False):
-    global nb_update_network,step_count
-    # net
+    global nb_update_network,step_count,save_log_points
     if train:
         net.train()
     else:
@@ -504,6 +501,9 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
     loss_avg_to_log['loss_class'] = []
     if(epoch == start_epoch):
         step_count = int(len(train_loader)/opt.loginterval*(start_epoch-1))
+
+    save_log_points = len(train_loader)*opt.batchsize/opt.loginterval
+    save_point = len(train_loader)/save_log_points 
     for batch_idx, targets in enumerate(tqdm(train_loader)):
         optimizer.zero_grad()
         logged = 0
@@ -571,7 +571,7 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
         # print(loss_class.item(),loss_belief.item(),loss_affinities.item() )
         loss = loss_affinities + loss_belief
 
-        print(features["feats_MobileNet_head_input"][0].shape)
+        # print(features["feats_MobileNet_head_input"][0].shape)
         
         
         #save one output of the network and one gt
@@ -581,7 +581,7 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
             if train:
                 post = "train"
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tStep: {}\tLoss: {:.15f}'.format(
-                    epoch, batch_idx * len(data), len(train_loader.dataset),
+                    epoch, batch_idx * len(data), len(train_loader), #train_loader.dataset
                     100. * batch_idx / len(train_loader), int(step_count), loss.item()))
             else:
                 post = 'test'
@@ -664,10 +664,10 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
                     #     100. * batch_idx / len(train_loader), loss.item()))
 
                     # write to tensorboard
-                    writer.add_scalar('loss/train_loss_batch',np.mean(loss_avg_to_log["loss"]),step_count)
-                    writer.add_scalar('loss/train_cls_batch',np.mean(loss_avg_to_log["loss_class"]),step_count)
-                    writer.add_scalar('loss/train_aff_batch',np.mean(loss_avg_to_log["loss_affinities"]),step_count)
-                    writer.add_scalar('loss/train_bel_batch',np.mean(loss_avg_to_log["loss_belief"]),step_count)
+                    writer.add_scalar('loss_per_loginterval/train_loss',np.mean(loss_avg_to_log["loss"]),step_count)
+                    writer.add_scalar('loss_per_loginterval/train_cls',np.mean(loss_avg_to_log["loss_class"]),step_count)
+                    writer.add_scalar('loss_per_loginterval/train_aff',np.mean(loss_avg_to_log["loss_affinities"]),step_count)
+                    writer.add_scalar('loss_per_loginterval/train_bel',np.mean(loss_avg_to_log["loss_belief"]),step_count)
                     step_count = step_count + 1
 
                     # write to txt

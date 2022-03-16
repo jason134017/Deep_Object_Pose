@@ -145,6 +145,8 @@ def loadimages(root,datastyle = "json",extensions= ['png']):
     def explore(path):
         if not os.path.isdir(path):
             return
+        if(path==root):
+            add_json_files(path)
         folders = [os.path.join(path, o) for o in os.listdir(path) 
                         if os.path.isdir(os.path.join(path,o))]
         if len(folders)>0:
@@ -182,9 +184,10 @@ class CleanVisiiDopeLoader(data.Dataset):
         def load_data(path,extensions):
             imgs = loadimages(path,extensions = extensions)
 
+            # Bug while Reading folder files will repeat
             # Check all the folders in path 
-            for name in os.listdir(str(path)):
-                imgs += loadimages(path +"/"+name,extensions = extensions)
+            # for name in os.listdir(str(path)):
+            #     imgs += loadimages(path +"/"+name,extensions = extensions)
             return imgs
         self.imgs = []
         for path_look in path_dataset:
