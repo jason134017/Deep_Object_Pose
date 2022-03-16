@@ -108,7 +108,7 @@ parser.add_argument('--network', default='dream_full', help="[dream_full,dope,mo
 parser.add_argument('--namefile', default='epoch', help="name to put on the file of the save weightss")
 parser.add_argument('--manualseed', type=int, help='manual seed')
 parser.add_argument('--epochs', type=int, default=60)
-parser.add_argument('--loginterval', type=int, default=100)
+parser.add_argument('--loginterval', type=int, default=1000)
 # parser.add_argument('--gpuids',nargs='+', type=int, default=[0,1,2,3], help='GPUs to use')
 parser.add_argument('--gpuids',nargs='+', type=int, default=[0], help='GPUs to use')
 parser.add_argument('--extensions',nargs='+', type=str, default=["png"], 
@@ -257,6 +257,19 @@ torch.manual_seed(opt.manualseed)
 
 torch.cuda.manual_seed_all(opt.manualseed)
 
+features = {}
+FEATS = []
+def get_features(name):
+    def hook(self, input, output):
+        #print(output["p2"].shape)
+        #print(output["p3"].shape)
+        #print('Inside ' + self.__class__.__name__ + ' forward')
+        features[name+"_output"] = output #output.detach()
+        features[name+"_input"] = input
+        #print('input[0]: ', input[0].shape)
+        print(output.detach().shape)
+    return hook
+
 if not opt.save:
     contrast = 0.2
     brightness = 0.2
@@ -276,20 +289,24 @@ else:
                            transforms.Resize(opt.imagesize),
                            transforms.ToTensor()])
 # default output_size
-output_size = 400
+output_size = 50
+opt.sigma = 0.5
 # if opt.network == 'resnetsimple':
 #     net = ResnetSimple()
 #     output_size = 208
     
 if opt.network == 'dope':
-    net = DopeNetwork()
-    # output_size = 50
-    # opt.sigma = 0.5
+    if (opt.pretrained):
+        net = DopeNetwork(pretrained=True)
+    else:
+        net = DopeNetwork()
+    output_size = 50
+    opt.sigma = 0.5
 
 elif opt.network == 'full':
     net = ()
-    # output_size = 400
-    # opt.sigma = 2
+    output_size = 400
+    opt.sigma = 2
     net = DreamHourglassMultiStage(
         9,
         n_stages = 2,
@@ -298,62 +315,64 @@ elif opt.network == 'full':
         full_output = True)
 
 elif opt.network == 'mobile':
-    net = ()
-    # output_size = 50
-    # opt.sigma = 0.5
-    net = DopeMobileNet() 
-
-elif opt.network == 'mobileV3_Large':
-    net = ()
-    # output_size = 50
-    # opt.sigma = 0.5
-    net = DopeMobileNetV3_Large() 
-
-elif opt.network == 'mobileV3_Small':
-    net = ()
-    # output_size = 50
-    # opt.sigma = 0.5
-    net = DopeMobileNetV3_Small() 
-elif opt.network == 'EfficientNet_B0':
-    net = ()
-    # output_size = 50
-    # opt.sigma = 0.5
-    net = DopeEfficientNet_B0()
-elif opt.network == 'EfficientNet_B1':
-    net = ()
-    # output_size = 50
-    # opt.sigma = 0.5
-    net = DopeEfficientNet_B1() 
-elif opt.network == 'EfficientNet_B2':
-    net = ()
-    # output_size = 50
-    # opt.sigma = 0.5
-    net = DopeEfficientNet_B2() 
-elif opt.network == 'EfficientNet_B3':
-    net = ()
-    # output_size = 50
+    # net = ()
+    output_size = 50
     opt.sigma = 0.5
-    net = DopeEfficientNet_B3()     
+    if (opt.pretrained):
+        net = DopeMobileNet() 
+    else:
+        net = DopeMobileNet() 
+    net.mobile_feature.register_forward_hook(get_features('feats_MobileNet_head'))
+elif opt.network == 'mobileV3_Large':
+    if (opt.pretrained):
+        net = DopeMobileNetV3_Large(pretrained=True) 
+    else:
+        net = DopeMobileNetV3_Large() 
+elif opt.network == 'mobileV3_Small':
+    if (opt.pretrained):
+        net = DopeMobileNetV3_Small(pretrained=True) 
+    else:
+        net = DopeMobileNetV3_Small() 
+elif opt.network == 'EfficientNet_B0':
+    if (opt.pretrained):
+        net = DopeEfficientNet_B0(pretrained=True)
+    else:
+        net = DopeEfficientNet_B0()
+elif opt.network == 'EfficientNet_B1':
+   if (opt.pretrained):
+       net = DopeEfficientNet_B1(pretrained=True)
+   else:
+       net = DopeEfficientNet_B1() 
+elif opt.network == 'EfficientNet_B2':
+    if (opt.pretrained):
+        net = DopeEfficientNet_B2(pretrained=True) 
+    else:
+        net = DopeEfficientNet_B2()
+elif opt.network == 'EfficientNet_B3':
+    if (opt.pretrained):
+        net = DopeEfficientNet_B3(pretrained=True)
+    else:
+        net = DopeEfficientNet_B3()     
 elif opt.network == 'EfficientNet_B4':
-    net = ()
-    # output_size = 50
-    # opt.sigma = 0.5
-    net = DopeEfficientNet_B4()     
+    if (opt.pretrained):
+        net = DopeEfficientNet_B4(pretrained=True)
+    else:
+        net = DopeEfficientNet_B4()     
 elif opt.network == 'EfficientNet_B5':
-    net = ()
-    # output_size = 50
-    # opt.sigma = 0.5
-    net = DopeEfficientNet_B5()     
+    if (opt.pretrained):
+        net = DopeEfficientNet_B5(pretrained=True)
+    else:
+        net = DopeEfficientNet_B5()     
 elif opt.network == 'EfficientNet_B6':
-    net = ()
-    # output_size = 50
-    # opt.sigma = 0.5
-    net = DopeEfficientNet_B6()     
+    if (opt.pretrained):
+        net = DopeEfficientNet_B6(pretrained=True)
+    else:
+        net = DopeEfficientNet_B6()     
 elif opt.network == 'EfficientNet_B7':
-    net = ()
-    # output_size = 50
-    # opt.sigma = 0.5
-    net = DopeEfficientNet_B7()     
+    if (opt.pretrained):
+        net = DopeEfficientNet_B7(pretrained=True)
+    else:
+        net = DopeEfficientNet_B7()     
 elif opt.network == 'boundary':
 
     # if not opt.net_dope is None:
@@ -363,9 +382,6 @@ elif opt.network == 'boundary':
     #     net_dope.load_state_dict(tmp)
 
     net = BoundaryAwareNet(opt.net_dope)
-    # output_size = 50
-    # opt.sigma = 1
-
 else:
     print(f'network {opt.network} does not exists')
     quit()
@@ -486,7 +502,8 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
     loss_avg_to_log['loss_affinities'] = []
     loss_avg_to_log['loss_belief'] = []
     loss_avg_to_log['loss_class'] = []
-    step_count= int(len(train_loader)/opt.loginterval*(start_epoch-1))
+    if(epoch == start_epoch):
+        step_count = int(len(train_loader)/opt.loginterval*(start_epoch-1))
     for batch_idx, targets in enumerate(tqdm(train_loader)):
         optimizer.zero_grad()
         logged = 0
@@ -505,11 +522,11 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
         # print (f'data: {data.shape}')        
         # print (f'target_belief: {target_belief.shape}')        
         # print (f'target_affinities: {target_affinities.shape}')        
-        # print (f'target_segmentation: {target_segmentation.shape}')        
+        # print (f'target_segmentation: {target_segmentation.shape}')    
+        # print(net)    
         output_belief, output_aff = net(data)
-        
         loss = None
-        
+        # print(len(output_belief))
         # print(f'len: {len(output_net)}')
         # print(f'1: {output_net[0][0].shape}')
         # print(f'2: {output_net[0][1].shape}')
@@ -554,6 +571,9 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
         # print(loss_class.item(),loss_belief.item(),loss_affinities.item() )
         loss = loss_affinities + loss_belief
 
+        print(features["feats_MobileNet_head_input"][0].shape)
+        
+        
         #save one output of the network and one gt
         # if False : 
         if batch_idx == 0 : 
@@ -648,7 +668,7 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
                     writer.add_scalar('loss/train_cls_batch',np.mean(loss_avg_to_log["loss_class"]),step_count)
                     writer.add_scalar('loss/train_aff_batch',np.mean(loss_avg_to_log["loss_affinities"]),step_count)
                     writer.add_scalar('loss/train_bel_batch',np.mean(loss_avg_to_log["loss_belief"]),step_count)
-                    step_count = step_count+1
+                    step_count = step_count + 1
 
                     # write to txt
                     namefile = '/loss_train.txt'
@@ -707,6 +727,6 @@ for epoch in range(start_epoch, opt.epochs + 1):
         break
 # print(best_results)
 if opt.local_rank == 0:
-    torch.save(net.state_dict(), f'{opt.outf}/net_{opt.namefile}_{opt.network}_{str(epoch).zfill(3)}.pth')
+    torch.save(net.state_dict(), f'{opt.outf}/net_{opt.namefile}_{opt.network}_final.pth')
 print ("end:" , datetime.datetime.now().time())
 
