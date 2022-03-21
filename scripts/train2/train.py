@@ -267,7 +267,7 @@ def get_features(name):
         features[name+"_output"] = output #output.detach()
         features[name+"_input"] = input
         #print('input[0]: ', input[0].shape)
-        print(output.detach().shape)
+        #print(output.detach().shape)
     return hook
 
 if not opt.save:
@@ -297,8 +297,10 @@ opt.sigma = 0.5
     
 if opt.network == 'dope':
     if (opt.pretrained):
+        print("pretrained")
         net = DopeNetwork(pretrained=True)
     else:
+        print("not pretrained")
         net = DopeNetwork()
 elif opt.network == 'full':
     net = ()
@@ -312,9 +314,11 @@ elif opt.network == 'full':
         full_output = True)
 elif opt.network == 'mobile':
     if (opt.pretrained):
-        net = DopeMobileNet() 
+        print("pretrained")
+        net = DopeMobileNet(pretrained=True) 
     else:
-        net = DopeMobileNet() 
+        print("not pretrained")
+        net = DopeMobileNet(pretrained=False) 
     net.mobile_feature.register_forward_hook(get_features('feats_MobileNet_head'))
 elif opt.network == 'mobileV3_Large':
     if (opt.pretrained):
@@ -330,7 +334,7 @@ elif opt.network == 'EfficientNet_B0':
     if (opt.pretrained):
         net = DopeEfficientNet_B0(pretrained=True)
     else:
-        net = DopeEfficientNet_B0()
+        net = DopeEfficientNet_B0(pretrained=False)
 elif opt.network == 'EfficientNet_B1':
    if (opt.pretrained):
        net = DopeEfficientNet_B1(pretrained=True)
@@ -393,7 +397,7 @@ if not opt.data == "":
         objects = opt.objects
         )
     # print(f"train_dataset: {len(train_dataset)}")
-    print(f"train_dataset: {train_dataset.imgs}")
+    # print(f"train_dataset: {train_dataset.imgs}")
     trainingdata = torch.utils.data.DataLoader(train_dataset,
         batch_size = opt.batchsize, 
         shuffle = True,

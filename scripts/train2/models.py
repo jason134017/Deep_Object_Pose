@@ -131,7 +131,7 @@ class DopeMobileNet(nn.Module):
         self.head_2_aff = build_block(64+numBeliefMap+(numBeliefMap-1)*2,(numBeliefMap-1)*2,1)
 
 
-
+    # @torch.jit.script_method
     def forward(self, x):
         '''Runs inference on the neural network'''
         # print(x.shape)
