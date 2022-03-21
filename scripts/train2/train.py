@@ -124,7 +124,8 @@ parser.add_argument('--save', action="store_true", help='save a batch and quit')
 parser.add_argument('--verbose', action="store_true", help='speak out your mind program')
 parser.add_argument('--dontsave', action="store_true", default=False,help='dont_save_weights')
 
-parser.add_argument("--pretrained",default=True,help='do you want to have pretrained weights')
+#parser.add_argument("--pretrained",type=bool, default=True,help='do you want to have pretrained weights')
+parser.add_argument("--pretrained",default=False, action="store_true",help='do you want to have pretrained weights')
 
 # Feature extractor
 # parser.add_argument('--features', default="vgg", help='vgg or resnet')
@@ -294,7 +295,7 @@ opt.sigma = 0.5
 # if opt.network == 'resnetsimple':
 #     net = ResnetSimple()
 #     output_size = 208
-    
+print( "pretrained arg is ",opt.pretrained)
 if opt.network == 'dope':
     if (opt.pretrained):
         print("pretrained")
