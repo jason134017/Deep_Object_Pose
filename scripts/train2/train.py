@@ -661,7 +661,7 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
         loss_avg_to_log["loss_affinities"].append(loss_affinities.item())
         loss_avg_to_log["loss_belief"].append(loss_belief.item())
             
-        if batch_idx % opt.loginterval == 0:
+        if batch_idx % int(opt.loginterval/opt.batchsize) == 0:
             if not opt.horovod or hvd.rank() == 0:
                 if train:
                     # print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.15f}'.format(
