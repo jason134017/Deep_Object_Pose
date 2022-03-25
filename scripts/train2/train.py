@@ -304,17 +304,29 @@ if opt.network == 'dope':
         print("not pretrained")
         net = DopeNetwork()
 elif opt.network.find("resnet") !=-1:
+    ResnetSize = 50
     try:
         ResnetSize = int(opt.network.replace("resnet",""))
     except:
         ResnetSize = 50
-    if (opt.pretrained):
-        print("pretrained")
-        net = net = DopeResNet(ResnetSize=ResnetSize, pretrained=True)
+
+    if (ResnetSize ==18):    
+        if (opt.pretrained):
+            print("pretrained")
+            net = net = DopeResNet18(pretrained=True)
+        else:
+            print("not pretrained")
+            net = DopeResNet18(pretrained=False)
+        output_size = 24
+    # default is resnet50
     else:
-        print("not pretrained")
-        net = DopeNetwork(ResnetSize=ResnetSize,pretrained=False)
-    output_size = 208
+        if (opt.pretrained):
+            print("pretrained")
+            net = net = DopeResNet50(pretrained=True)
+        else:
+            print("not pretrained")
+            net = DopeResNet50(pretrained=False)
+        output_size = 24
 elif opt.network == 'full':
     net = ()
     output_size = 400
@@ -450,9 +462,21 @@ print('load models')
 
 # net = torch.nn.DataParallel(net,device_ids=opt.gpuids).cuda()
 # net = torch.nn.DataParallel(net).cuda()
-net = torch.nn.parallel.DistributedDataParallel(net.cuda(),
-    device_ids=[opt.local_rank],
-    output_device=opt.local_rank)
+# net = torch.nn.parallel.DistributedDataParallel(net.cuda(),
+#     device_ids=[opt.local_rank],
+#     output_device=opt.local_rank,
+#     find_unused_parameters=True)
+if (opt.network.find("resnet") !=-1):
+    net = torch.nn.parallel.DistributedDataParallel(net.cuda(),
+        device_ids=[opt.local_rank],
+        output_device=opt.local_rank,
+        find_unused_parameters=True)
+else:
+     net = torch.nn.parallel.DistributedDataParallel(net.cuda(),
+        device_ids=[opt.local_rank],
+        output_device=opt.local_rank
+        )
+
 # print(net)
 
 step_count = 0
@@ -548,6 +572,11 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
         # print(f'1: {output_net[0][0].shape}')
         # print(f'2: {output_net[0][1].shape}')
         # print(f'3: {output_net[0][2].shape}')
+
+        # print(f'output_belief: {output_belief.shape}')
+        # print(f'output_aff: {output_aff.shape}')
+
+
         # len: 2
         # 1: torch.Size([4, 9, 100, 100])
         # 2: torch.Size([4, 16, 100, 100])
