@@ -303,6 +303,18 @@ if opt.network == 'dope':
     else:
         print("not pretrained")
         net = DopeNetwork()
+elif opt.network.find("resnet") !=-1:
+    try:
+        ResnetSize = int(opt.network.replace("resnet",""))
+    except:
+        ResnetSize = 50
+    if (opt.pretrained):
+        print("pretrained")
+        net = net = DopeResNet(ResnetSize=ResnetSize, pretrained=True)
+    else:
+        print("not pretrained")
+        net = DopeNetwork(ResnetSize=ResnetSize,pretrained=False)
+    output_size = 208
 elif opt.network == 'full':
     net = ()
     output_size = 400

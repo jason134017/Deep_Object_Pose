@@ -23,7 +23,7 @@ weights: {
     #"bleach":"package://dope/weights/bleach_28_dr.pth",
     
     # NEW OBJECTS - HOPE
-    "AlphabetSoup":"package://dope/weights/AlphabetSoup.pth", 
+    #"AlphabetSoup":"package://dope/weights/AlphabetSoup.pth", 
     #"BBQSauce":"package://dope/weights/BBQSauce.pth", 
     #"Butter":"package://dope/weights/Butter.pth", 
     #"Cherries":"package://dope/weights/Cherries.pth", 
@@ -55,8 +55,9 @@ weights: {
     #"redtea":"package://dope/weights/redtea0119.pth",
     #"redtea":"package://dope/weights/redtea0120/net_epoch_72.pth",
     #"redtea":"package://dope/weights/redtea_mobile88.pth",
-    "redtea":"package://dope/weights/reatea_b0.pth",
-    #"milktea":"package://dope/weights/reatea_b0.pth",
+    #"redtea":"package://dope/weights/net_Redtea_dope_045_np.pth",
+    "milktea":"package://dope/weights/net_Milktea_mobile_041_p.pth",
+    #"milktea":"package://dope/weights/net_Milktea_mobile_100.pth"
 
 }
 
@@ -65,8 +66,9 @@ architectures: {
     #'pudding':"dope",
     #'alphabet_soup':'resnet_simple', 
     'AlphabetSoup':'dope',  
-    'redtea':'EfficientNet_B0',
-    'milktea':'dope'
+    #'redtea':'EfficientNet_B0',
+    'redtea':'dope',
+    'milktea':'mobile'
 }
 
 
@@ -163,7 +165,7 @@ class_ids: {
 draw_colors: {
     "cracker": [13, 255, 128],  # green
     "gelatin": [255, 255, 255],  # while
-    "meat": [0, 104, 255],  # blue
+    "meat": [0, 194, 255],  # blue
     "mustard": [217,12, 232],  # magenta
     "soup": [255, 101, 0],  # orange
     "sugar": [232, 222, 12],  # yellow
