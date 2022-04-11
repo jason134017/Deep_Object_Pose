@@ -1277,10 +1277,10 @@ class DopeNetwork(nn.Module):
 
         self.stop_at_stage = stop_at_stage
 
-        vgg_full = models.vgg19(pretrained=pretrained).features
+        self.vgg_full = models.vgg19(pretrained=pretrained).features
         self.vgg = nn.Sequential()
         for i_layer in range(24):
-            self.vgg.add_module(str(i_layer), vgg_full[i_layer])
+            self.vgg.add_module(str(i_layer), self.vgg_full[i_layer])
 
         # Add some layers
         i_layer = 23
@@ -1446,11 +1446,11 @@ class BoundaryAwareNet(nn.Module):
             self.dope.load_state_dict(new_state_dict)
             print("DOPE pretrained loaded")
         #rest of vgg 
-        vgg_full = models.vgg19(pretrained=True).features
+        self.vgg_full = models.vgg19(pretrained=True).features
 
         self.vgg = nn.Sequential()
-        for i_layer in range(0,len(vgg_full)):
-            self.vgg.add_module(str(i_layer), vgg_full[i_layer])
+        for i_layer in range(0,len(self.vgg_full)):
+            self.vgg.add_module(str(i_layer), self.vgg_full[i_layer])
 
         # input resampling
         self.upsample = torch.nn.Upsample(scale_factor=8)
@@ -1705,7 +1705,6 @@ class DreamHourglass(nn.Module):
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         vgg_t = models.vgg19(pretrained=True).features
-
         self.down_sample = nn.MaxPool2d(2)
 
         self.layer_0_1_down = nn.Sequential()

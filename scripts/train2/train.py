@@ -265,6 +265,7 @@ def get_features(name):
         #print(output["p2"].shape)
         #print(output["p3"].shape)
         #print('Inside ' + self.__class__.__name__ + ' forward')
+        # print("hook!")
         features[name+"_output"] = output #output.detach()
         features[name+"_input"] = input
         #print('input[0]: ', input[0].shape)
@@ -303,6 +304,7 @@ if opt.network == 'dope':
     else:
         print("not pretrained")
         net = DopeNetwork()
+    # net.vgg_full.register_forward_hook(get_features('feats_Dope_head'))
 elif opt.network.find("resnet") !=-1:
     ResnetSize = 50
     try:
@@ -337,6 +339,7 @@ elif opt.network == 'full':
         internalize_spatial_softmax = False,
         deconv_decoder = False,
         full_output = True)
+    # net.stage1.vgg_feature.register_forward_hook(get_features('feats_full_stage1_head'))
 elif opt.network == 'mobile':
     if (opt.pretrained):
         print("pretrained")
@@ -567,6 +570,21 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
         # print(net)    
         output_belief, output_aff = net(data)
         loss = None
+
+        images_feature = None
+        if (opt.network == "mobile"):
+            images_feature = Variable(features["feats_MobileNet_head_output"])
+            # print(features["feats_MobileNet_head_output"].shape)
+            # print(features["feats_MobileNet_head_input"][0].shape)
+        elif(opt.network == "dope"):
+            # images_feature = Variable(net.vgg_full)
+            # print(features["feats_Dope_head_input"][0].shape)
+            pass 
+        elif(opt.network == "full"):
+            # images_feature = Variable(net.stage1.vgg_feature)
+            # print(features["feats_full_stage1_head_input"])
+            pass
+
         # print(len(output_belief))
         # print(f'len: {len(output_net)}')
         # print(f'1: {output_net[0][0].shape}')
@@ -642,6 +660,51 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
                         epoch,
                         dataformats="CWH",
                         )
+
+
+                    if (opt.network == "mobile"):
+                        # feature   
+                        # print(images_feature.shape)
+                        # feature_map = images_feature.cpu().numpy()
+                        # if len(feature_map.shape) == 4:    
+                        #     #-------------------------------------------
+                        #     # Just do this for the conv / maxpool layers, not the fully-connected layers
+                        #     #-------------------------------------------
+                        #     n_features = feature_map.shape[ 1]  # number of features in the feature map
+                        #     size       = feature_map.shape[ 2]  # feature map shape (1, size, size, n_features)
+                            
+                        #     # We will tile our images in this matrix
+                        #     display_grid = np.zeros((size, size * n_features))
+                            
+                        #     #-------------------------------------------------
+                        #     # Postprocess the feature to be visually palatable
+                        #     #-------------------------------------------------
+                        #     for i in range(n_features):
+                        #         x  = feature_map[0, i, :, :]
+                        #         x -= x.mean()
+                        #         x /= x.std ()
+                        #         x *=  64
+                        #         x += 128
+                        #         x  = np.clip(x, 0, 255).astype('uint8')
+                        #         display_grid[:, i * size : (i + 1) * size] = x # Tile each filter into a horizontal grid
+
+                        #     print(display_grid.shape)
+                        #     writer.add_image(f"{post}_image_feature_{i_output}",
+                        #     display_grid,
+                        #     epoch,
+                        #     dataformats="HW",
+                        #     )
+                        trans = transforms.Lambda(lambda x: x.repeat(3, 1, 1) if x.size(0)==1 else x)
+                        out = images_feature[i_output][0].unsqueeze(0)
+                        out = trans(out)
+                        print(out.shape)
+                        writer.add_image(f"{post}_image_feature_{i_output}",
+                            out,
+                            epoch,
+                            dataformats="CWH",
+                            )
+
+
 
                     # belief maps gt
                     imgs = VisualizeBeliefMap(target_belief[i_output])

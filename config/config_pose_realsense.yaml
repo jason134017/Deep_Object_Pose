@@ -9,10 +9,14 @@ topic_camera_info: "/camera/color/camera_info"
 #topic_camera_info: "/rgb_to_depth/camera_info"
 topic_publishing: "dope"
 input_is_rectified: True   # Whether the input image is rectified (strongly suggested!)
-downscale_height: 400      # if the input image is larger than this, scale it down to this pixel height
+downscale_height: 640      # if the input image is larger than this, scale it down to this pixel height
 backbone: "dope"  #feedforward network [dope,mobile,efficientnet]
 
 # Comment any of these lines to prevent detection / pose estimation of that object
+# path rule:
+#
+# package://dope/weights/{object_name}/{network}/{is pretrain?}/{weights}
+#
 weights: {
     #"cracker":"package://dope/weights/cracker_60.pth",
     #"gelatin":"package://dope/weights/gelatin_60.pth",
@@ -52,12 +56,12 @@ weights: {
     #"Tuna":"package://dope/weights/Tuna.pth",
     #"Yogurt":"package://dope/weights/Yogurt.pth",
     #"Applemilk":"package://dope/weights/Applemilk60.pth",
-    #"redtea":"package://dope/weights/redtea0119.pth",
+    #"redtea":"package://dope/weights/Reatea/full/net_Redtea_full_033.pth",
     #"redtea":"package://dope/weights/redtea0120/net_epoch_72.pth",
-    #"redtea":"package://dope/weights/redtea_mobile88.pth",
-    #"redtea":"package://dope/weights/net_Redtea_dope_045_np.pth",
-    "milktea":"package://dope/weights/net_Milktea_mobile_041_p.pth",
-    #"milktea":"package://dope/weights/net_Milktea_mobile_100.pth"
+    "redtea":"package://dope/weights/Reatea/Mobile/p/redtea_mobile88.pth",
+    #"redtea":"package://dope/weights/Reatea/Dope/np/net_Redtea_dope_final.pth",
+    #"milktea":"package://dope/weights/net_Milktea_mobile_041_p.pth",
+    #"milktea":"package://dope/weights/Milktea/Mobile/np/net_Milktea_mobile_198.pth"
 
 }
 
@@ -67,7 +71,7 @@ architectures: {
     #'alphabet_soup':'resnet_simple', 
     'AlphabetSoup':'dope',  
     #'redtea':'EfficientNet_B0',
-    'redtea':'dope',
+    'redtea':'mobile',
     'milktea':'mobile'
 }
 

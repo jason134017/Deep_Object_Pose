@@ -663,6 +663,13 @@ class ModelData(object):
             net = DopeEfficientNet_B6()
         elif(self.architecture == 'EfficientNet_B7'):
             net = DopeEfficientNet_B7()
+        elif(self.architecture == 'full'):
+            net = DreamHourglassMultiStage(
+            9,
+            n_stages = 2,
+            internalize_spatial_softmax = False,
+            deconv_decoder = False,
+            full_output = True)
         net = torch.nn.DataParallel(net, [0]).cuda()
         net.load_state_dict(torch.load(path))
         net.eval()
@@ -692,6 +699,7 @@ class ObjectDetector(object):
         # Run network inference
         image_tensor = transform(in_img)
         image_torch = Variable(image_tensor).cuda().unsqueeze(0)
+        # print(image_torch.shape)
         out, seg = net_model(image_torch)
         vertex2 = out[-1][0]
         aff = seg[-1][0]

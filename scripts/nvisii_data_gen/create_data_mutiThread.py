@@ -78,6 +78,20 @@ parser.add_argument(
     default='dome_hdri_haven/',
     help = "dome light hdr"
 )
+
+parser.add_argument(
+    '--width',
+    default=500,
+    type=int,
+    help = 'image output width'
+)
+parser.add_argument(
+    '--height',
+    default=500,
+    type=int,
+    help = 'image output height'
+)
+
 opt = parser.parse_args()
 
 
@@ -88,7 +102,7 @@ for i in range(opt.start,opt.end):
     # commands.append(f'python single_video_pybullet2.py --spp 10000 --nb_frames 100 --nb_objects {str(int(random.uniform(5,10)))} --outf dataset_redtea/{str(i).zfill(3)} --nb_distractors 0')
     commands.append(f'python single_video_pybullet.py --spp {opt.spp} --nb_frames {opt.nb_frames} --outf {str(opt.outf)}/{str(i).zfill(3)}  \
 --objs_folder {opt.objs_folder} --nb_objects {opt.nb_objects} --nb_distractors {opt.nb_distractors} \
---objs_folder_distrators {opt.objs_folder_distrators} --skyboxes_folder {opt.skyboxes_folder}')
+--objs_folder_distrators {opt.objs_folder_distrators} --skyboxes_folder {opt.skyboxes_folder} --height {opt.height} --width {opt.width}')
     # print(commands[-1])
     #com = f'echo {str(i)}'
     #commands.append(com)

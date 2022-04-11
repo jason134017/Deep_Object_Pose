@@ -1258,6 +1258,8 @@ def _runnetwork(epoch, loader, train=True):
         
         output_belief, output_affinities = net(data)
                        
+        images_feature = net.
+
         if train:
             optimizer.zero_grad()
         target_belief = Variable(targets['beliefs'].cuda())        
