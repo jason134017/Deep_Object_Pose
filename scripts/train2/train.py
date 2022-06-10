@@ -305,6 +305,15 @@ if opt.network == 'dope':
         print("not pretrained")
         net = DopeNetwork()
     # net.vgg_full.register_forward_hook(get_features('feats_Dope_head'))
+elif opt.network == 'dope_s3':
+    if (opt.pretrained):
+        print("pretrained")
+        #net = DopeNetwork(pretrained=True,stop_at_stage=3)
+        net = DopeNetworkStage3(pretrained=True,stop_at_stage=3)
+    else:
+        print("not pretrained")
+        #net = DopeNetwork(stop_at_stage=3)
+        net = DopeNetworkStage3(stop_at_stage=3)
 elif opt.network.find("resnet") !=-1:
     ResnetSize = 50
     try:
@@ -348,6 +357,14 @@ elif opt.network == 'mobile':
         print("not pretrained")
         net = DopeMobileNet(pretrained=False) 
     net.mobile_feature.register_forward_hook(get_features('feats_MobileNet_head'))
+elif opt.network == 'mobile_quantization':
+    if (opt.pretrained):
+        print("pretrained")
+        net = DopeMobileNet_quantize(pretrained=True) 
+    else:
+        print("not pretrained")
+        net = DopeMobileNet_quantize(pretrained=False) 
+    # net.mobile_feature.register_forward_hook(get_features('feats_MobileNet_head'))
 elif opt.network == 'mobileV3_Large':
     if (opt.pretrained):
         net = DopeMobileNetV3_Large(pretrained=True) 
@@ -465,20 +482,21 @@ print('load models')
 
 # net = torch.nn.DataParallel(net,device_ids=opt.gpuids).cuda()
 # net = torch.nn.DataParallel(net).cuda()
-# net = torch.nn.parallel.DistributedDataParallel(net.cuda(),
-#     device_ids=[opt.local_rank],
-#     output_device=opt.local_rank,
-#     find_unused_parameters=True)
-if (opt.network.find("resnet") !=-1):
-    net = torch.nn.parallel.DistributedDataParallel(net.cuda(),
-        device_ids=[opt.local_rank],
-        output_device=opt.local_rank,
-        find_unused_parameters=True)
-else:
-     net = torch.nn.parallel.DistributedDataParallel(net.cuda(),
-        device_ids=[opt.local_rank],
-        output_device=opt.local_rank
-        )
+net = torch.nn.parallel.DistributedDataParallel(net.cuda(),
+    device_ids=[opt.local_rank],
+    output_device=opt.local_rank,
+    find_unused_parameters=True)
+
+# if (opt.network.find("resnet") !=-1):
+#     net = torch.nn.parallel.DistributedDataParallel(net.cuda(),
+#         device_ids=[opt.local_rank],
+#         output_device=opt.local_rank,
+#         find_unused_parameters=True)
+# else:
+#      net = torch.nn.parallel.DistributedDataParallel(net.cuda(),
+#         device_ids=[opt.local_rank],
+#         output_device=opt.local_rank
+#         )
 
 # print(net)
 
@@ -697,7 +715,7 @@ def _runnetwork(epoch,train_loader,train=True,syn=False):
                         trans = transforms.Lambda(lambda x: x.repeat(3, 1, 1) if x.size(0)==1 else x)
                         out = images_feature[i_output][0].unsqueeze(0)
                         out = trans(out)
-                        print(out.shape)
+                        # print(out.shape)
                         writer.add_image(f"{post}_image_feature_{i_output}",
                             out,
                             epoch,

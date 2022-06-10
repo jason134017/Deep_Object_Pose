@@ -27,7 +27,7 @@ weights: {
     #"bleach":"package://dope/weights/bleach_28_dr.pth",
     
     # NEW OBJECTS - HOPE
-    #"AlphabetSoup":"package://dope/weights/AlphabetSoup.pth", 
+    "AlphabetSoup":"package://dope/weights/AlphabetSoup.pth", 
     #"BBQSauce":"package://dope/weights/BBQSauce.pth", 
     #"Butter":"package://dope/weights/Butter.pth", 
     #"Cherries":"package://dope/weights/Cherries.pth", 
@@ -60,8 +60,10 @@ weights: {
     #"redtea":"package://dope/weights/redtea0120/net_epoch_72.pth",
     "redtea":"package://dope/weights/Reatea/Mobile/p/redtea_mobile88.pth",
     #"redtea":"package://dope/weights/Reatea/Dope/np/net_Redtea_dope_final.pth",
+    #"redtea":"package://dope/weights/net_Reatea_EfficientNet_B4_final.pth",
     #"milktea":"package://dope/weights/net_Milktea_mobile_041_p.pth",
     #"milktea":"package://dope/weights/Milktea/Mobile/np/net_Milktea_mobile_198.pth"
+    #"milktea":"package://dope/weights/Milktea/Dope/p/net_Milktea_dope_123.pth"
 
 }
 
@@ -70,9 +72,9 @@ architectures: {
     #'pudding':"dope",
     #'alphabet_soup':'resnet_simple', 
     'AlphabetSoup':'dope',  
-    #'redtea':'EfficientNet_B0',
+    #'redtea':'mobile',
     'redtea':'mobile',
-    'milktea':'mobile'
+    'milktea':'dope'
 }
 
 

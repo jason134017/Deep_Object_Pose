@@ -106,6 +106,8 @@ example = torch.rand(1, 3, 400, 400)
 out = model(example)
 print(len(out))
 
+
+
 make_mobilenetv2_nnapi(Path(os.environ["HOME"]) / "mobilenetv2-nnapi", "none")
 # traced_script_module = torch.jit.trace(model, example)
 # traced_script_module.save("model_mobile_full400.pt")

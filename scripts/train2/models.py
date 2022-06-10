@@ -160,6 +160,100 @@ class DopeMobileNet(nn.Module):
 
         return  [belief_0,belief_1,belief_2],\
                 [aff_0,aff_1,aff_2]
+
+
+class DopeMobileNet_quantize(nn.Module):
+    def __init__(
+            self,
+            pretrained=False,
+            numBeliefMap=9,
+            numAffinity=16,
+            stop_at_stage=6  # number of stages to process (if less than total number of stages)
+        ):
+        super(DopeMobileNet_quantize, self).__init__()
+
+        # self.mobile_feature = torch.hub.load('pytorch/vision:v0.6.0', 'mobilenet_v2', pretrained=pretrained).features
+        self.mobile_feature =  models.quantization.mobilenet_v2(pretrained=True, progress=True, quantize=True).features
+
+        # upsample to 50x50 from 13x13
+        self.upsample = nn.Sequential()
+        self.upsample.add_module('0', nn.Upsample(scale_factor=2))
+
+        # should this go before the upsample?
+        # self.upsample.add_module('4', nn.Conv2d(1280, 640,
+        #     kernel_size=3, stride=1, padding=1))
+        self.upsample.add_module('44',InvertedResidual(1280, 640, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+        # self.upsample.add_module('55',InvertedResidual(1280, 640, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+
+        # self.upsample.add_module('5', nn.ReLU(inplace=True))
+
+        # self.upsample.add_module('6', nn.Conv2d(640, 320,
+        #     kernel_size=3, stride=1, padding=1))
+
+        self.upsample.add_module('10', nn.Upsample(scale_factor=2))
+        # self.upsample.add_module('14', nn.Conv2d(320, 160,
+        #     kernel_size=3, stride=1, padding=1))
+        # self.upsample.add_module('15', nn.ReLU(inplace=True))
+        # self.upsample.add_module('16', nn.Conv2d(160, 64,
+        #     kernel_size=3, stride=1, padding=0))
+        self.upsample.add_module('55',InvertedResidual(640, 320, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+        self.upsample.add_module('56',InvertedResidual(320, 64, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+
+        # set 50,50
+        self.upsample.add_module('4', nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=0))
+
+        # final output - change that for mobile block
+        # self.heads_0 = nn.Sequential()
+
+        def build_block(inputs, outputs, nb_layers = 2 ):
+            layers = []
+            layers.append(InvertedResidual(inputs, 64, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+            for l in range(nb_layers-1):
+                layers.append(InvertedResidual(64, 64, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))        
+            layers.append(nn.Conv2d(64, outputs, kernel_size=3, stride=1, padding=1))
+            # layers.append('4', nn.Conv2d(64, outputs, kernel_size=3, stride=1, padding=1))
+            return nn.Sequential(*layers)
+
+        self.head_0_beliefs = build_block(64,numBeliefMap)
+        self.head_0_aff = build_block(64,(numBeliefMap-1)*2,3)
+
+        self.head_1_beliefs = build_block(64+numBeliefMap+((numBeliefMap-1)*2),numBeliefMap,3)
+        self.head_1_aff = build_block(64+numBeliefMap+(numBeliefMap-1)*2,(numBeliefMap-1)*2,2)
+
+        self.head_2_beliefs = build_block(64+numBeliefMap+((numBeliefMap-1)*2),numBeliefMap,3)
+        self.head_2_aff = build_block(64+numBeliefMap+(numBeliefMap-1)*2,(numBeliefMap-1)*2,1)
+
+
+    # @torch.jit.script_method
+    def forward(self, x):
+        '''Runs inference on the neural network'''
+        # print(x.shape)
+        out_features = self.mobile_feature(x)
+        # print('out2_features',out_features.shape)
+        output_up = self.upsample(out_features)
+        # print('output_up',output_up.shape)
+
+        # stages
+        belief_0 = self.head_0_beliefs(output_up)
+        aff_0 = self.head_0_aff(output_up)
+
+        # print(belief_0.shape)
+
+        out_0 = torch.cat([output_up, belief_0, aff_0], 1)
+
+        # print(out_0.shape)
+        # raise()
+        belief_1 = self.head_1_beliefs(out_0)
+        aff_1 = self.head_1_aff(out_0)
+
+        out_1 = torch.cat([output_up, belief_1, aff_1], 1)
+
+        belief_2 = self.head_2_beliefs(out_1)
+        aff_2 = self.head_2_aff(out_1)
+
+        return  [belief_0,belief_1,belief_2],\
+                [aff_0,aff_1,aff_2]
+
 class DopeResNet18(nn.Module):
     def __init__(
             self,
@@ -1368,6 +1462,166 @@ class DopeNetwork(nn.Module):
 
         return [out1_2, out2_2, out3_2, out4_2, out5_2, out6_2],\
                [out1_1, out2_1, out3_1, out4_1, out5_1, out6_1]
+                        
+    @staticmethod
+    def create_stage(in_channels, out_channels, first=False):
+        '''Create the neural network layers for a single stage.'''
+
+        model = nn.Sequential()
+        mid_channels = 128
+        if first:
+            padding = 1
+            kernel = 3
+            count = 6
+            final_channels = 512
+        else:
+            padding = 3
+            kernel = 7
+            count = 10
+            final_channels = mid_channels
+
+        # First convolution
+        model.add_module("0",
+                         nn.Conv2d(
+                             in_channels,
+                             mid_channels,
+                             kernel_size=kernel,
+                             stride=1,
+                             padding=padding)
+                        )
+
+        # Middle convolutions
+        i = 1
+        while i < count - 1:
+            model.add_module(str(i), nn.ReLU(inplace=True))
+            i += 1
+            model.add_module(str(i),
+                             nn.Conv2d(
+                                 mid_channels,
+                                 mid_channels,
+                                 kernel_size=kernel,
+                                 stride=1,
+                                 padding=padding))
+            i += 1
+
+        # Penultimate convolution
+        model.add_module(str(i), nn.ReLU(inplace=True))
+        i += 1
+        model.add_module(str(i), nn.Conv2d(mid_channels, final_channels, kernel_size=1, stride=1))
+        i += 1
+
+        # Last convolution
+        model.add_module(str(i), nn.ReLU(inplace=True))
+        i += 1
+        model.add_module(str(i), nn.Conv2d(final_channels, out_channels, kernel_size=1, stride=1))
+        i += 1
+
+        return model
+
+
+class DopeNetworkStage3(nn.Module):
+    def __init__(
+            self,
+            pretrained=False,
+            numBeliefMap=9,
+            numAffinity=16,
+            stop_at_stage=6  # number of stages to process (if less than total number of stages)
+        ):
+        super(DopeNetworkStage3, self).__init__()
+
+        self.stop_at_stage = stop_at_stage
+
+        self.vgg_full = models.vgg19(pretrained=pretrained).features
+        self.vgg = nn.Sequential()
+        for i_layer in range(24):
+            self.vgg.add_module(str(i_layer), self.vgg_full[i_layer])
+
+        # Add some layers
+        i_layer = 23
+        self.vgg.add_module(str(i_layer), nn.Conv2d(512, 256, kernel_size=3, stride=1, padding=1))
+        self.vgg.add_module(str(i_layer+1), nn.ReLU(inplace=True))
+        self.vgg.add_module(str(i_layer+2), nn.Conv2d(256, 128, kernel_size=3, stride=1, padding=1))
+        self.vgg.add_module(str(i_layer+3), nn.ReLU(inplace=True))
+
+        # print('---Belief------------------------------------------------')
+        # _2 are the belief map stages
+        self.m1_2 = DopeNetwork.create_stage(128, numBeliefMap, True)
+        self.m2_2 = DopeNetwork.create_stage(128 + numBeliefMap + numAffinity,
+                                             numBeliefMap, False)
+        self.m3_2 = DopeNetwork.create_stage(128 + numBeliefMap + numAffinity,
+                                             numBeliefMap, False)
+        # self.m4_2 = DopeNetwork.create_stage(128 + numBeliefMap + numAffinity,
+        #                                      numBeliefMap, False)
+        # self.m5_2 = DopeNetwork.create_stage(128 + numBeliefMap + numAffinity,
+        #                                      numBeliefMap, False)
+        # self.m6_2 = DopeNetwork.create_stage(128 + numBeliefMap + numAffinity,
+        #                                      numBeliefMap, False)
+
+        # print('---Affinity----------------------------------------------')
+        # _1 are the affinity map stages
+        self.m1_1 = DopeNetwork.create_stage(128, numAffinity, True)
+        self.m2_1 = DopeNetwork.create_stage(128 + numBeliefMap + numAffinity,
+                                             numAffinity, False)
+        self.m3_1 = DopeNetwork.create_stage(128 + numBeliefMap + numAffinity,
+                                             numAffinity, False)
+        # self.m4_1 = DopeNetwork.create_stage(128 + numBeliefMap + numAffinity,
+        #                                      numAffinity, False)
+        # self.m5_1 = DopeNetwork.create_stage(128 + numBeliefMap + numAffinity,
+        #                                      numAffinity, False)
+        # self.m6_1 = DopeNetwork.create_stage(128 + numBeliefMap + numAffinity,
+        #                                      numAffinity, False)
+
+
+    def forward(self, x):
+        '''Runs inference on the neural network'''
+
+        out1 = self.vgg(x)
+
+        out1_2 = self.m1_2(out1)
+        out1_1 = self.m1_1(out1)
+
+        if self.stop_at_stage == 1:
+            return [out1_2],\
+                   [out1_1]
+
+        out2 = torch.cat([out1_2, out1_1, out1], 1)
+        out2_2 = self.m2_2(out2)
+        out2_1 = self.m2_1(out2)
+
+        if self.stop_at_stage == 2:
+            return [out1_2, out2_2],\
+                   [out1_1, out2_1]
+
+        out3 = torch.cat([out2_2, out2_1, out1], 1)
+        out3_2 = self.m3_2(out3)
+        out3_1 = self.m3_1(out3)
+
+        if self.stop_at_stage == 3:
+            return [out1_2, out2_2, out3_2],\
+                   [out1_1, out2_1, out3_1]
+
+        # out4 = torch.cat([out3_2, out3_1, out1], 1)
+        # out4_2 = self.m4_2(out4)
+        # out4_1 = self.m4_1(out4)
+
+        # if self.stop_at_stage == 4:
+        #     return [out1_2, out2_2, out3_2, out4_2],\
+        #            [out1_1, out2_1, out3_1, out4_1]
+
+        # out5 = torch.cat([out4_2, out4_1, out1], 1)
+        # out5_2 = self.m5_2(out5)
+        # out5_1 = self.m5_1(out5)
+
+        # if self.stop_at_stage == 5:
+        #     return [out1_2, out2_2, out3_2, out4_2, out5_2],\
+        #            [out1_1, out2_1, out3_1, out4_1, out5_1]
+
+        # out6 = torch.cat([out5_2, out5_1, out1], 1)
+        # out6_2 = self.m6_2(out6)
+        # out6_1 = self.m6_1(out6)
+
+        # return [out1_2, out2_2, out3_2, out4_2, out5_2, out6_2],\
+        #        [out1_1, out2_1, out3_1, out4_1, out5_1, out6_1]
                         
     @staticmethod
     def create_stage(in_channels, out_channels, first=False):

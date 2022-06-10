@@ -17,6 +17,7 @@ I also made an inference script that runs without any ROS components.
 
 ```
 python inference.py
+python  inference.py --data ../nvisii_data_gen/output/AlphabetSoup_eval --outf ./AlphabetSoup_eval/
 ``` 
 
 Look at the file for more information, similar to the ROS node everything is run through the yaml files in `config_inference`. It is very similar to the original code with some changes. 

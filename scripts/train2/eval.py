@@ -19,7 +19,7 @@ from objectron.dataset import box
 
 from scipy.spatial.transform import Rotation as R
 
-objects_interest ='redtea'
+objects_interest ='AlphabetSoup'
 
 iou_sum = 0
 iou_total = 0
@@ -108,7 +108,8 @@ if __name__ == "__main__":
     imgs = []
     imgs_out = []
     imgsname = []
-
+    visibility_object = 0
+    detect_object = 0
     if not opt.data is None:
         videopath = opt.data
         outpath = opt.outf 
@@ -137,6 +138,7 @@ if __name__ == "__main__":
         all_location = []
         all_quaternion_xyzw = []
         flag = False
+        inference_flag = False
         path_json = imgs[i_image].replace(".png",".json")
 
 
@@ -155,6 +157,7 @@ if __name__ == "__main__":
             # load the projected_cuboid_keypoints
             if obj['visibility'] == 1:
                 flag = True
+                visibility_object += 1
                 projected_cuboid_keypoints = obj['projected_cuboid']
                 location = obj["location"]
                 quaternion_xyzw = obj["quaternion_xyzw"]
@@ -232,10 +235,11 @@ if __name__ == "__main__":
         with open(path_json_out) as f:
             data_json_out = json.load(f)
         for obj in data_json_out['objects']:  
+            inference_flag = True
             quaternion_xyzw_out = obj["quaternion_xyzw"]
             # print(quaternion_xyzw_out)
             r_out = R.from_quat(quaternion_xyzw_out)
-            
+            detect_object +=1
 
             # rotation
             o = r_out.as_euler('zyx', degrees=True)  
@@ -272,9 +276,10 @@ if __name__ == "__main__":
             # box2= np.array([p8,p5,p4,p0,p1,p6,p7,p2,p3])
             box2= np.array([p8,p5,p4,p1,p0,p6,p7,p2,p3])
             # print(box2)
+        if not inference_flag:
+            continue
         w1 = box.Box(vertices=box1)
         w2 = box.Box(vertices=box2)
-
         loss = iou.IoU(w1, w2)
         if (flag):
             print('iou = ', loss.iou())
@@ -303,7 +308,14 @@ if __name__ == "__main__":
             #time.sleep(3)
             break
     iou_result = iou_sum/iou_total
+
+    Accuracy = detect_object/visibility_object
     # print(iou_total) #194
+    result = f'| visibility_object  | detect_object | Accuracy |\
+             \n|:-------------------|:--------------|:---------|\
+             \n|        {visibility_object}       |        {detect_object}       | {Accuracy:.5f} | '
+    print(result)
+
     result = f'| 3D IOU Max. | 3D IOU Min. | 3D IOU Avg. |\
              \n|:------------|:------------|:------------|\
              \n|  {iou_max:.5f}    |  {iou_min:.5f}    |  {iou_result:.5f}    |'

@@ -641,8 +641,13 @@ class ModelData(object):
         print("Ues Backbone model '{}'...".format(self.architecture))
         if(self.architecture == 'dope'):
             net = DopeNetwork()
+        elif(self.architecture == 'dope_s3'):
+            # net = DopeNetwork(stop_at_stage = 3)
+            net = DopeNetworkStage3(stop_at_stage = 3)
         elif(self.architecture == 'mobile'):
             net = DopeMobileNet()
+        elif(self.architecture == 'mobile_quantization'):
+            net = DopeMobileNet_quantize()
         elif(self.architecture == 'mobileV3_Small'):
             net = DopeMobileNetV3_Small()
         elif(self.architecture == 'mobileV3_Large'):

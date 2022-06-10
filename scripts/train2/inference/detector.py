@@ -245,12 +245,27 @@ class ModelData(object):
         '''Loads network model from disk with given path'''
         model_loading_start_time = time.time()
         print("Loading DOPE model '{}'...".format(path))
+        print(self.architecture)
         if self.architecture == 'dope':
             net = DopeNetwork()
-        if self.architecture == 'mobile':
+        elif self.architecture == 'mobile':
             net = DopeMobileNet()
-        else:
-            net = ResnetSimple()
+        elif self.architecture == 'mobile_quantization':
+            net = DopeMobileNet_quantize()
+        elif self.architecture == 'dope_s3':
+            # net = DopeNetwork(stop_at_stage=3)
+            net = DopeNetworkStage3(stop_at_stage=3)
+        elif self.architecture == 'EfficientNet_B0':
+            net = DopeEfficientNet_B0()
+        elif self.architecture == 'full':
+            net = DreamHourglassMultiStage(
+                9,
+                n_stages = 2,
+                internalize_spatial_softmax = False,
+                deconv_decoder = False,
+                full_output = True)
+        # elif:
+        #     net = ResnetSimple()
         net = torch.nn.DataParallel(net, [0]).cuda()
         net.load_state_dict(torch.load(path))
         net.eval()

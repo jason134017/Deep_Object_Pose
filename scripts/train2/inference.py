@@ -186,10 +186,11 @@ class DopeNode(object):
         img_copy = img.copy()
         im = Image.fromarray(img_copy)
         draw = Draw(im)
+        detect_count = 0
 
 
         # dictionary for the final output
-        dict_out = {"camera_data":{},"objects":[]}
+        dict_out = {"camera_data":{},"objects":[],"detect_count": 0 }
 
         for m in self.models:
             # Detect object
@@ -211,6 +212,7 @@ class DopeNode(object):
                 ori = result["quaternion"]
                 
                 print(loc)
+                detect_count += 1
 
                 dict_out['objects'].append({
                     'class':m,
@@ -236,6 +238,7 @@ class DopeNode(object):
                     for pair in result['projected_points']:
                         points2d.append(tuple(pair))
                     draw.draw_cube(points2d, self.draw_colors[m])
+            dict_out['detect_count'] = detect_count
         # save the output of the image. 
         im.save(f"{output_folder}/{img_name}.png")
 
