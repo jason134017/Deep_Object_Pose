@@ -58,7 +58,7 @@ weights: {
     #"Applemilk":"package://dope/weights/Applemilk60.pth",
     #"redtea":"package://dope/weights/Reatea/full/net_Redtea_full_033.pth",
     #"redtea":"package://dope/weights/redtea0120/net_epoch_72.pth",
-    "redtea":"package://dope/weights/Reatea/Mobile/p/redtea_mobile88.pth",
+    #"redtea":"package://dope/weights/Reatea/Mobile/p/redtea_mobile88.pth",
     #"redtea":"package://dope/weights/Reatea/Dope/np/net_Redtea_dope_final.pth",
     #"redtea":"package://dope/weights/net_Reatea_EfficientNet_B4_final.pth",
     #"milktea":"package://dope/weights/net_Milktea_mobile_041_p.pth",

@@ -53,17 +53,17 @@ transform = transforms.Compose([
     ])
 
 
-#================================ Models ================================
+# ================================ Models ================================
 
 
-class DopeNetwork(nn.Module):
+class DopeNetworkDefault(nn.Module):
     def __init__(
             self,
             numBeliefMap=9,
             numAffinity=16,
             stop_at_stage=6  # number of stages to process (if less than total number of stages)
         ):
-        super(DopeNetwork, self).__init__()
+        super(DopeNetworkDefault, self).__init__()
 
         self.stop_at_stage = stop_at_stage
 

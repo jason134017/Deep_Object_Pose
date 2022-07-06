@@ -21,11 +21,17 @@ weights: {
     # 'pudding':"weights_dope/pudding.pth"
     # 'pudding':"weights_dope/dope_network/net_epoch_60.pth"
     #'alphabet_soup':"weights_dope/resnet_simple/alphabe_soup.pth"
-    #'alphabet_soup':"/home/airobot/dopeData/weights/AlphabetSoup.pth"
-    'alphabet_soup':"/home/airobot/dopeData/weights/net_AlphabetSoup_dope_s3_final_old.pth"
+
+    #dope
+    'alphabet_soup':"/home/airobot/dopeData/weights/AlphabetSoup.pth"
+    #'alphabet_soup':"/home/airobot/dopeData/weights/net_AlphabetSoup_dope_s3_final.pth"
     #'alphabet_soup':"/home/airobot/dope/weights/AlphabetSoup_default.pth",
+    
     #'alphabet_soup':"/home/airobot/dopeData/weights/net_AlphabetSoup_mobile_final.pth",
-    #'alphabet_soup':"/home/airobot/dope/scripts/train2/AlphtbetSoup_Efficient_B0/net_AlphabetSoup_EfficientNet_B0_final.pth",
+    # EfficientNet_B0
+    #'alphabet_soup':"/home/airobot/dopeData/weights/net_AlphabetSoup_EfficientNet_B0_final.pth",
+    # Dope self train
+    #'alphabet_soup':"/home/airobot/dopeData/weights/net_AlphabetSoup_dope_final.pth",
     #'redtea':'/home/airobot/dope/weights/redtea72_default.pth',
     # "redtea":"/home/airobot/dope/weights/redtea_mobileV2_88.pth",
 
@@ -35,7 +41,7 @@ weights: {
 architectures: {
     'pudding':"dope",
     #'alphabet_soup':'resnet_simple', 
-    'alphabet_soup':'dope_s3',  
+    'alphabet_soup':'dope',  
     'redtea':'dope'
 }
 

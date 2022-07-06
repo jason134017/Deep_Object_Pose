@@ -1,2 +1,4 @@
 scripts/nvisii_data_gen/output/
 __pycache__/
+*.pt
+*.pyc

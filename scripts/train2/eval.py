@@ -22,7 +22,9 @@ from scipy.spatial.transform import Rotation as R
 objects_interest ='AlphabetSoup'
 
 iou_sum = 0
+iou_all_sum=0
 iou_total = 0
+iou_not_total = 0
 iou_max = 0
 iou_min = 1
 def draw_boxes(boxes = [], clips = [], colors = ['r', 'b', 'g' , 'k']):
@@ -273,7 +275,7 @@ if __name__ == "__main__":
 
             
             #print(np.array([p8,p5,p4,p0,p1,p6,p7,p2,p3]))
-            # box2= np.array([p8,p5,p4,p0,p1,p6,p7,p2,p3])
+            #box2= np.array([p8,p5,p4,p0,p1,p6,p7,p2,p3])
             box2= np.array([p8,p5,p4,p1,p0,p6,p7,p2,p3])
             # print(box2)
         if not inference_flag:
@@ -290,6 +292,8 @@ if __name__ == "__main__":
             # print(r_in.as_euler('zyx', degrees=True)-r_out.as_euler('zyx', degrees=True))
             iou_sum += loss.iou()
             iou_total +=1
+        else:
+            iou_not_total +=1
         # print('iou (via sampling)= ', loss.iou_sampling())
         # intersection_points = loss.intersection_points
 
@@ -308,7 +312,7 @@ if __name__ == "__main__":
             #time.sleep(3)
             break
     iou_result = iou_sum/iou_total
-
+    iou_all_result = iou_sum/(iou_total+iou_not_total)
     Accuracy = detect_object/visibility_object
     # print(iou_total) #194
     result = f'| visibility_object  | detect_object | Accuracy |\
@@ -320,5 +324,6 @@ if __name__ == "__main__":
              \n|:------------|:------------|:------------|\
              \n|  {iou_max:.5f}    |  {iou_min:.5f}    |  {iou_result:.5f}    |'
     print(result)
+    print(iou_all_result)
     time.sleep(3)
     cv2.destroyAllWindows()

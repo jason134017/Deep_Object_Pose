@@ -171,10 +171,11 @@ class DopeMobileNet_quantize(nn.Module):
             stop_at_stage=6  # number of stages to process (if less than total number of stages)
         ):
         super(DopeMobileNet_quantize, self).__init__()
-
+        self.quant = torch.quantization.QuantStub()
         # self.mobile_feature = torch.hub.load('pytorch/vision:v0.6.0', 'mobilenet_v2', pretrained=pretrained).features
-        self.mobile_feature =  models.quantization.mobilenet_v2(pretrained=True, progress=True, quantize=True).features
-
+        # self.mobile_feature =  models.quantization.mobilenet_v2(pretrained=True, progress=True, quantize=True).features
+        self.mobile_feature =  models.quantization.mobilenet_v2(pretrained=True, quantize=True).features
+        self.dequant = torch.quantization.DeQuantStub()
         # upsample to 50x50 from 13x13
         self.upsample = nn.Sequential()
         self.upsample.add_module('0', nn.Upsample(scale_factor=2))
@@ -228,7 +229,10 @@ class DopeMobileNet_quantize(nn.Module):
     def forward(self, x):
         '''Runs inference on the neural network'''
         # print(x.shape)
+        x = self.quant(x)
         out_features = self.mobile_feature(x)
+
+        #out_features = self.dequant(out_features )
         # print('out2_features',out_features.shape)
         output_up = self.upsample(out_features)
         # print('output_up',output_up.shape)
@@ -253,6 +257,113 @@ class DopeMobileNet_quantize(nn.Module):
 
         return  [belief_0,belief_1,belief_2],\
                 [aff_0,aff_1,aff_2]
+
+
+class DopeMobileNet_quant(nn.Module):
+    def __init__(
+            self,
+            pretrained=False,
+            numBeliefMap=9,
+            numAffinity=16,
+            stop_at_stage=6  # number of stages to process (if less than total number of stages)
+        ):
+        super(DopeMobileNet_quant, self).__init__()
+        self.quant = torch.quantization.QuantStub()
+        self.mobile_feature = torch.hub.load('pytorch/vision:v0.6.0', 'mobilenet_v2', pretrained=pretrained).features
+        # self.mobile_feature =  models.quantization.mobilenet_v2(pretrained=True, progress=True, quantize=True).features
+        #self.mobile_feature =  models.quantization.mobilenet_v2(pretrained=True, quantize=True).features
+        self.dequant = torch.quantization.DeQuantStub()
+        # upsample to 50x50 from 13x13
+        self.upsample = nn.Sequential()
+        self.upsample.add_module('0', nn.Upsample(scale_factor=2))
+
+        # should this go before the upsample?
+        # self.upsample.add_module('4', nn.Conv2d(1280, 640,
+        #     kernel_size=3, stride=1, padding=1))
+        self.upsample.add_module('44',InvertedResidual(1280, 640, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+        # self.upsample.add_module('55',InvertedResidual(1280, 640, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+
+        # self.upsample.add_module('5', nn.ReLU(inplace=True))
+
+        # self.upsample.add_module('6', nn.Conv2d(640, 320,
+        #     kernel_size=3, stride=1, padding=1))
+
+        self.upsample.add_module('10', nn.Upsample(scale_factor=2))
+        # self.upsample.add_module('14', nn.Conv2d(320, 160,
+        #     kernel_size=3, stride=1, padding=1))
+        # self.upsample.add_module('15', nn.ReLU(inplace=True))
+        # self.upsample.add_module('16', nn.Conv2d(160, 64,
+        #     kernel_size=3, stride=1, padding=0))
+        self.upsample.add_module('55',InvertedResidual(640, 320, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+        self.upsample.add_module('56',InvertedResidual(320, 64, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+
+        # set 50,50
+        self.upsample.add_module('4', nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=0))
+
+        # final output - change that for mobile block
+        # self.heads_0 = nn.Sequential()
+
+        def build_block(inputs, outputs, nb_layers = 2 ):
+            layers = []
+            layers.append(InvertedResidual(inputs, 64, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))
+            for l in range(nb_layers-1):
+                layers.append(InvertedResidual(64, 64, stride=1, expand_ratio=6, norm_layer=nn.BatchNorm2d))        
+            layers.append(nn.Conv2d(64, outputs, kernel_size=3, stride=1, padding=1))
+            # layers.append('4', nn.Conv2d(64, outputs, kernel_size=3, stride=1, padding=1))
+            return nn.Sequential(*layers)
+
+        self.head_0_beliefs = build_block(64,numBeliefMap)
+        self.head_0_aff = build_block(64,(numBeliefMap-1)*2,3)
+
+        self.head_1_beliefs = build_block(64+numBeliefMap+((numBeliefMap-1)*2),numBeliefMap,3)
+        self.head_1_aff = build_block(64+numBeliefMap+(numBeliefMap-1)*2,(numBeliefMap-1)*2,2)
+
+        self.head_2_beliefs = build_block(64+numBeliefMap+((numBeliefMap-1)*2),numBeliefMap,3)
+        self.head_2_aff = build_block(64+numBeliefMap+(numBeliefMap-1)*2,(numBeliefMap-1)*2,1)
+
+
+    # @torch.jit.script_method
+    def forward(self, x):
+        '''Runs inference on the neural network'''
+        # print(x.shape)
+        x = self.quant(x)
+        out_features = self.mobile_feature(x)
+
+        #out_features = self.dequant(out_features )
+        # print('out2_features',out_features.shape)
+        output_up = self.upsample(out_features)
+        # print('output_up',output_up.shape)
+
+        # stages
+        belief_0 = self.head_0_beliefs(output_up)
+        aff_0 = self.head_0_aff(output_up)
+
+        # print(belief_0.shape)
+
+        out_0 = torch.cat([output_up, belief_0, aff_0], 1)
+
+        # print(out_0.shape)
+        # raise()
+        belief_1 = self.head_1_beliefs(out_0)
+        aff_1 = self.head_1_aff(out_0)
+
+        out_1 = torch.cat([output_up, belief_1, aff_1], 1)
+
+        belief_2 = self.head_2_beliefs(out_1)
+        aff_2 = self.head_2_aff(out_1)
+
+        belief_0_dequant = self.dequant(belief_0)
+        belief_1_dequant = self.dequant(belief_1)
+        belief_2_dequant = self.dequant(belief_2)
+
+        aff_0_dequant = self.dequant(aff_0)
+        aff_1_dequant = self.dequant(aff_1)
+        aff_2_dequant = self.dequant(aff_2)
+
+        # return  [belief_0,belief_1,belief_2],\
+        #         [aff_0,aff_1,aff_2]
+        return  [belief_0_dequant,belief_1_dequant,belief_2_dequant],\
+                [aff_0_dequant,aff_1_dequant,aff_2_dequant]
 
 class DopeResNet18(nn.Module):
     def __init__(
